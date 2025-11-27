@@ -71,10 +71,13 @@ void bouger_annulation(t_Plateau plateau,int caisse, int ancien_lig, int ancien_
 int main() {
   //definition des variables
   char fichier[15];
+  char nomdeplacement[15];
+  char nom[15] = "";
   int compteur = 0;
   char touche = '\0';
   bool abandon = false;
   char enregistement = NON;
+  char sauvegarde_deplacement = NON;
   int lig = 0;
   int col = 0;
   int zoom = 1;
@@ -105,9 +108,7 @@ int main() {
     // progression
     printf("Voulez vous enregistrer la partie (y = oui / n = non) : ");
     scanf("%c", &enregistement);
-    if (enregistement == OUI) {
-      //si oui, on demande le nom attribué
-      char nom[15] = "";
+    if (enregistement == OUI) { //si oui, on demande le nom attribué
       printf("Quel nom voulez vous lui donner : ");
       scanf("%14s", nom);
       enregistrer_partie(plateau, nom);
@@ -119,6 +120,15 @@ int main() {
   if (gagne(plateau) == true) {
     printf("Félicitation pour avoir su ranger ces caisses en %d coups\n",
       compteur);
+  }
+  printf("Voulez vous enregistrer vos déplacements ? (y = oui/n = non)\n");
+  scanf(" %c", &sauvegarde_deplacement);
+  if (sauvegarde_deplacement == OUI) {
+    printf("Quel nom voulez vous lui donner : ");
+    scanf("%14s", nomdeplacement);
+    enregistrer_deplacements(deplacement, compteur, nomdeplacement);
+    printf("Vos déplacements ont bien été enregistrés dans le fichier %s\n",
+      nomdeplacement);
   }
   return 0;
 }
