@@ -585,36 +585,18 @@ void bouger_annulation(t_Plateau plateau,int caisse, int ancien_lig,
   if (caisse == 1) {
     // Cas avec caisse
     // Remettre Sokoban à sa position avant (ancien_lig, ancien_col)
-    if (plateau[ancien_lig][ancien_col] == CHAR_CIBLE) {
-      plateau[ancien_lig][ancien_col] = CHAR_SOKOBAN_CIBLE;
-    } else {
-      plateau[ancien_lig][ancien_col] = CHAR_SOKOBAN;
-    }
+    plateau[ancien_lig][ancien_col] = CHAR_CIBLE ? CHAR_SOKOBAN_CIBLE :
+     CHAR_SOKOBAN;
     // Remettre la caisse à sa position avant la poussée (où Sokoban 
     // est actuellement)
-    if (plateau[lig][col] == CHAR_CIBLE) {
-      plateau[lig][col] = CHAR_CAISSE_CIBLE;
-    } else {
-      plateau[lig][col] = CHAR_CAISSE;
-    }
+    plateau[lig][col] = CHAR_CIBLE ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
     // Nettoyer la position où la caisse avait été poussée
-    if (plateau[pci][pcj] == CHAR_CAISSE_CIBLE) {
-      plateau[pci][pcj] = CHAR_CIBLE;
-    } else if (plateau[pci][pcj] == CHAR_CAISSE) {
-      plateau[pci][pcj] = CHAR_VIDE;
-    }
+    plateau[pci][pcj] = CHAR_CAISSE_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
   } else {
     // Cas sans caisse
-    if (plateau[ancien_lig][ancien_col] == CHAR_CIBLE) {
-      plateau[ancien_lig][ancien_col] = CHAR_SOKOBAN_CIBLE;
-    } else {
-      plateau[ancien_lig][ancien_col] = CHAR_SOKOBAN;
-    }
+    plateau[ancien_lig][ancien_col] = CHAR_CIBLE ? CHAR_SOKOBAN_CIBLE :
+     CHAR_SOKOBAN;
     // Nettoyer la position actuelle
-    if (plateau[lig][col] == CHAR_SOKOBAN_CIBLE) {
-      plateau[lig][col] = CHAR_CIBLE;
-    } else {
-      plateau[lig][col] = CHAR_VIDE;
-    }
+    plateau[lig][col] = CHAR_SOKOBAN_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
   }
 }
