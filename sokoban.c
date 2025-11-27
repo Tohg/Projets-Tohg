@@ -387,11 +387,7 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
         return; // Autres caractères : pas de déplacement
     }
     // Nettoyer l'ancienne position du joueur
-    if (plateau[*lig][*col] == CHAR_SOKOBAN_CIBLE) {
-        plateau[*lig][*col] = CHAR_CIBLE;
-    } else if (plateau[*lig][*col] == CHAR_SOKOBAN) {
-        plateau[*lig][*col] = CHAR_VIDE;
-    }
+    plateau[*lig][*col] = CHAR_SOKOBAN_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
     *lig = ti; // Mettre à jour les coordonnées 
     *col = tj; //du joueur si le mouvement est valide
     enregistrer_tab_deplacement(touche, deplacement, caisse, *compteur);
