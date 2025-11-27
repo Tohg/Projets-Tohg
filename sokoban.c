@@ -2,7 +2,7 @@
 * @file sokoban.c
 * @brief On doit ranger les caisses sur les cibles
 * @author Temeio HARAPOI--GAUDIN / 1B1
-* @version version1
+* @version version2
 * @date 09/11/2025
 *
 * Nous sommes '@', nous pouvons pousser les caisses '$',
