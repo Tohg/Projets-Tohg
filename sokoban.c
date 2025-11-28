@@ -345,6 +345,8 @@ void recherche_sokoban(t_Plateau plateau,int  *lig,int *col){
 *                 incrémenter le compteur si sokoban peut bouger
 * @param touche parametre d'entrée qui va permettre de savoir dans 
 *               quelle direction on cherche à bouger sokoban
+* @param plateauInitial va permettre de résoudre un problème en détectant les 
+*        cibles à l'origine du plateau
 */
 void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
   char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial) {
@@ -399,7 +401,10 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
     // Nettoyer l'ancienne position du joueur :
     // si la case était une cible à l'origine, remettre une cible,
     // sinon remettre un vide.
-    plateau[*lig][*col] = (plateauInitial[*lig][*col] == CHAR_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
+    plateau[*lig][*col] = ((plateauInitial[*lig][*col] == CHAR_CIBLE)||
+    ((plateauInitial[*lig][*col] == CHAR_CAISSE_CIBLE)||
+    ((plateauInitial[*lig][*col] == CHAR_SOKOBAN_CIBLE)))) 
+    ? CHAR_CIBLE : CHAR_VIDE;
     *lig = ti; // Mettre à jour les coordonnées 
     *col = tj; //du joueur si le mouvement est valide
     enregistrer_tab_deplacement(touche, deplacement, caisse, *compteur);
@@ -496,11 +501,14 @@ void zoomer(char touche,int *zoom){
 }
 
 /**
-* @brief 
-* @param touche
-* @param deplacement
-* @param caisse
-* @param compteur
+* @brief permets d'enregistrer le coup effectué en fonction de la
+*        touche pressé et de si le coup a poussé une caisse
+* @param touche va influencer le caractere enregistré
+* @param deplacement tableau dans lequel sont enregistrés les coups
+* @param caisse va influencer si la case est une majuscule ou non
+*        en fonction de si l'on pousse une caisse ou non
+* @param compteur permets d'être bien rendu au bon endroit pour 
+*        enregistrer le coup
 */
 void enregistrer_tab_deplacement(char touche, t_tabDeplacement deplacement,
   int caisse, int compteur){
@@ -525,12 +533,20 @@ void enregistrer_tab_deplacement(char touche, t_tabDeplacement deplacement,
 }
 
 /**
-* @brief 
-* @param plateau
-* @param lig
-* @param col
-* @param compteur
-* @param touche
+* @brief Permets d'annuler son coup et ainsi donc
+*        de décrémenter le compteur
+* @param plateau va mettre à jour le plateau vers
+*        la position précédente
+* @param lig va remettre l'indice ligne à la position
+*        précédente de sokoban
+* @param col va remettre l'indice colonne à la position
+*        précédente de sokoban
+* @param compteur va décrémenter celui ci afin de ne pas
+*        comptabiliser le coup précédement effectué
+* @param touche c'est la derniere case du tableau t_tabDeplacement pour savoir
+*        quelle action annuler
+* @param plateauInitial va permettre de résoudre un problème en détectant les 
+*        cibles à l'origine du plateau
 */
 void deplacement_inverse(t_Plateau plateau, int *lig, int *col,
   int *compteur,char touche, t_Plateau plateauInitial){
@@ -589,31 +605,54 @@ void deplacement_inverse(t_Plateau plateau, int *lig, int *col,
 }
 
 /**
-* @brief 
-* @param plateau
-* @param caisse
-* @param ancien_lig
-* @param ancien_col
-* @param lig
-* @param col
-* @param pci
-* @param pcj
+* @brief procédure utilisé dans deplacement_inverse() pour annuler le
+*        coup précédent
+* @param plateau va mettre à jour le plateau vers
+*        la position précédente
+* @param caisse permet de savoir si le coup précedement effectué a poussé
+*               une caisse
+* @param ancien_lig ligne ou sokoban doit revenir
+* @param ancien_col colonne ou sokoban doit revenir
+* @param lig ligne ou est à l'instant sokoban
+* @param col colonne ou est à l'instant sokoban
+* @param pci indice de la ligne ou la caisse a été poussée
+* @param pcj indice de la colonne ou la caisse a été poussée
+* @param plateauInitial va permettre de résoudre un problème en détectant les 
+*        cibles à l'origine du plateau
 */
 void bouger_annulation(t_Plateau plateau,int caisse, int ancien_lig,
    int ancien_col,int lig,int col,int pci, int pcj, t_Plateau plateauInitial){
   if (caisse == 1) {
     // Cas avec caisse
     // Remettre Sokoban à sa position avant (ancien_lig, ancien_col)
-    plateau[ancien_lig][ancien_col] = (plateauInitial[ancien_lig][ancien_col] == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
-    // Remettre la caisse à sa position avant la poussée (où Sokoban est actuellement)
-    plateau[lig][col] = (plateauInitial[lig][col] == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
+    plateau[ancien_lig][ancien_col] = 
+    ((plateauInitial[ancien_lig][ancien_col] == CHAR_CIBLE)||
+    (plateauInitial[ancien_lig][ancien_col] == CHAR_CAISSE_CIBLE)||
+    (plateauInitial[ancien_lig][ancien_col] == CHAR_SOKOBAN_CIBLE)) 
+    ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
+    // Remettre la caisse à sa position avant la poussée (où Sokoban est 
+    // actuellement)
+    plateau[lig][col] = ((plateauInitial[lig][col] == CHAR_CIBLE)||
+    (plateauInitial[lig][col] == CHAR_CAISSE_CIBLE)||
+    (plateauInitial[lig][col] == CHAR_SOKOBAN_CIBLE)) 
+    ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
     // Nettoyer la position où la caisse avait été poussée :
     // si la case était une cible à l'origine, remettre une cible sinon vide.
-    plateau[pci][pcj] = (plateauInitial[pci][pcj] == CHAR_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
+    plateau[pci][pcj] = ((plateauInitial[pci][pcj] == CHAR_CIBLE)
+    ||(plateauInitial[pci][pcj] == CHAR_CAISSE_CIBLE)
+    ||(plateauInitial[pci][pcj] == CHAR_SOKOBAN_CIBLE)) 
+    ? CHAR_CIBLE : CHAR_VIDE;
   } else {
     // Cas sans caisse
-    plateau[ancien_lig][ancien_col] = (plateauInitial[ancien_lig][ancien_col] == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
+    plateau[ancien_lig][ancien_col] = 
+    ((plateauInitial[ancien_lig][ancien_col] == CHAR_CIBLE)||
+    (plateauInitial[ancien_lig][ancien_col] == CHAR_CAISSE_CIBLE)||
+    (plateauInitial[ancien_lig][ancien_col] == CHAR_SOKOBAN_CIBLE))
+     ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
     // Nettoyer la position actuelle
-    plateau[lig][col] = (plateauInitial[lig][col] == CHAR_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
+    plateau[lig][col] = ((plateauInitial[lig][col] == CHAR_CIBLE)||
+    (plateauInitial[lig][col] == CHAR_CAISSE_CIBLE)||
+    (plateauInitial[lig][col] == CHAR_SOKOBAN_CIBLE)) 
+    ? CHAR_CIBLE : CHAR_VIDE;
   }
 }
