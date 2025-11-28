@@ -449,12 +449,18 @@ void detecter_touche(char touche,int *lig,int *col,int *compteur,
 }
 
 /**
-* @brief 
-* @param plateauInitial
-* @param plateau
-* @param compteur
-* @param lig
-* @param col
+* @brief recharge le plateau à partir de celui 
+*.       de base
+* @param plateauInitial plateau initialement
+*        chargé 
+* @param plateau plateau modifié par les
+*        mouvement
+* @param compteur va réinitialiser le 
+*.       compteur
+* @param lig va remettre la ligne a la position 
+*.       initiale de sokoban
+* @param col va remettre la colonne a la position 
+*.       initiale de sokoban
 */
 void recommencer(t_Plateau plateauInitial, t_Plateau plateau,int *compteur,
   int *lig,int *col){
