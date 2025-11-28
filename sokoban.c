@@ -396,8 +396,10 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
     } else {
         return; // Autres caractères : pas de déplacement
     }
-    // Nettoyer l'ancienne position du joueur
-    plateau[*lig][*col] = CHAR_SOKOBAN_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
+    // Nettoyer l'ancienne position du joueur :
+    // si la case contenait sokoban-sur-cible, remettre une cible,
+    // sinon remettre un vide.
+    plateau[*lig][*col] = (plateau[*lig][*col] == CHAR_SOKOBAN_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
     *lig = ti; // Mettre à jour les coordonnées 
     *col = tj; //du joueur si le mouvement est valide
     enregistrer_tab_deplacement(touche, deplacement, caisse, *compteur);
@@ -591,18 +593,16 @@ void bouger_annulation(t_Plateau plateau,int caisse, int ancien_lig,
   if (caisse == 1) {
     // Cas avec caisse
     // Remettre Sokoban à sa position avant (ancien_lig, ancien_col)
-    plateau[ancien_lig][ancien_col] = CHAR_CIBLE ? CHAR_SOKOBAN_CIBLE :
-     CHAR_SOKOBAN;
-    // Remettre la caisse à sa position avant la poussée (où Sokoban 
-    // est actuellement)
-    plateau[lig][col] = CHAR_CIBLE ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
-    // Nettoyer la position où la caisse avait été poussée
-    plateau[pci][pcj] = CHAR_CAISSE_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
+    plateau[ancien_lig][ancien_col] = (plateau[ancien_lig][ancien_col] == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
+    // Remettre la caisse à sa position avant la poussée (où Sokoban est actuellement)
+    plateau[lig][col] = (plateau[lig][col] == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
+    // Nettoyer la position où la caisse avait été poussée :
+    // si elle contenait une caisse-sur-cible, remettre une cible sinon vide.
+    plateau[pci][pcj] = (plateau[pci][pcj] == CHAR_CAISSE_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
   } else {
     // Cas sans caisse
-    plateau[ancien_lig][ancien_col] = CHAR_CIBLE ? CHAR_SOKOBAN_CIBLE :
-     CHAR_SOKOBAN;
+    plateau[ancien_lig][ancien_col] = (plateau[ancien_lig][ancien_col] == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
     // Nettoyer la position actuelle
-    plateau[lig][col] = CHAR_SOKOBAN_CIBLE ? CHAR_CIBLE : CHAR_VIDE;
+    plateau[lig][col] = (plateau[lig][col] == CHAR_SOKOBAN_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
   }
 }
