@@ -458,12 +458,17 @@ void detecter_touche(char touche,int *lig,int *col,int *compteur,
 */
 void recommencer(t_Plateau plateauInitial, t_Plateau plateau,int *compteur,
   int *lig,int *col){
-    //si l'on veut recommencer, on repart du plateauInitial
-    copie_plateau(plateauInitial,plateau);
-    *lig = 0;
-    *col = 0;
-    recherche_sokoban(plateau, lig, col);
-    *compteur = 0;
+    char confirmation = NON;
+    printf("Êtes-vous sûr de vouloir recommencer ? (y = oui / n = non) : ");
+    scanf(" %c", &confirmation);
+    if (confirmation == OUI){
+      //si l'on veut recommencer, on repart du plateauInitial
+      copie_plateau(plateauInitial,plateau);
+      *lig = 0;
+      *col = 0;
+      recherche_sokoban(plateau, lig, col);
+      *compteur = 0;
+    }
 }
 
 /**
