@@ -228,6 +228,7 @@ int kbhit() {
 *        sur cible et de sokoban sur cible par une caisse et sokoban
 * @param plateau de type t_Plateau qui est un parametre d'entrée et va être 
 *        affiché
+* @param zoom qui va répéter les motifs dans un carré de taille zoom 
 */
 void afficher_plateau(t_Plateau plateau,int zoom) {
   //affichage du plateau
