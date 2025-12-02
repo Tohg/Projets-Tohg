@@ -1,9 +1,9 @@
 /**
-* @file sokoban.c
+* @file sokoban2.c
 * @brief On doit ranger les caisses sur les cibles
-* @author Temeio HARAPOI--GAUDIN / 1B1
-* @version version2
-* @date 09/11/2025
+* @author Temeio HARAPOI--GAUDIN / Noa PRIEM/ 1B1
+* @version version1
+* @date 02/12/2025
 *
 * Nous sommes '@', nous pouvons pousser les caisses '$',
 * De cette maniere nous devons les déplacer sur les '.'
@@ -31,41 +31,36 @@ const char CHAR_CAISSE = '$';
 #define CHAR_CIBLE '.'
 #define CHAR_SOKOBAN_CIBLE '+'
 #define CHAR_CAISSE_CIBLE '*'
-#define OUI 'y'
-#define NON 'n'
-#define HAUT 'z'
-#define GAUCHE 'q'
-#define BAS 's'
+#define HAUT 'h'
+#define GAUCHE 'g'
+#define BAS 'b'
 #define DROITE 'd'
-#define RECOMMENCER 'r'
-#define ABANDONNER 'x'
-#define ZOOM_PLUS '+'
-#define ZOOM_MOINS '-'
-#define ZOOM_MIN 1
-#define ZOOM_MAX 3
-#define ANNULER 'u'
+#define HAUT_CAISSE 'H'
+#define GAUCHE_CAISSE 'G'
+#define BAS_CAISSE 'B'
+#define DROITE_CAISSE 'D'
 
 typedef char t_Plateau[TAILLE][TAILLE];
 typedef char t_tabDeplacement[MOUVEMENT];
 void charger_partie(t_Plateau plateau, char fichier[15]);
-void enregistrer_deplacements(t_tabDeplacement t, int nb, char fic[]);
-void chargerDeplacements(typeDeplacements t, char fichier[], int * nb);
+void charger_deplacements(t_tabDeplacement t, char fichier[], int * nb);
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
 void deplacer(t_Plateau plateau,int *lig, int *col,int *compteur, 
-  char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial);
+  char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial,
+  int caisse);
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
 void recherche_sokoban(t_Plateau plateau,int *lig,int *col);
 void detecter_touche(char touche,int *lig,int *col,int *compteur,
-  t_Plateau plateauInitial, t_Plateau plateau,bool *abandon,int *zoom, t_tabDeplacement deplacement);
+  t_Plateau plateauInitial, t_Plateau plateau, t_tabDeplacement deplacement);
 
 int main() {
   //definition des variables
   char fichier[15];
   char nomdeplacement[15];
   int compteur = 0;
-  char touche = '\0';
+  int tailleDep = 0;
   int lig = 0;
   int col = 0;
   //definition du plateau
@@ -75,16 +70,19 @@ int main() {
   scanf("%14s", fichier);
   charger_partie(plateauInitial, fichier);
   //definition des deplacement
-  printf("Quel fichier de déplacement : ")
+  printf("Quel fichier de déplacement : ");
   scanf("%14s", nomdeplacement);
-  charger_deplacements(deplacement,nomdeplacement,&compteur, );
+  charger_deplacements(deplacement,nomdeplacement,&tailleDep);
   //copie du niveau
   t_Plateau plateau;
   copie_plateau(plateauInitial,plateau);
   recherche_sokoban(plateau,&lig, &col);
   // dans la partie
-  afficher_entete(fichier, compteur);
-  afficher_plateau(plateau);
+  for (int i=0; i < tailleDep; i++){
+    afficher_entete(fichier, compteur);
+    afficher_plateau(plateau);
+  }
+  
   return 0;
 }
 
@@ -107,7 +105,7 @@ void charger_partie(t_Plateau plateau, char fichier[15]) {
   }
 }
 
-void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
+void charger_deplacements(t_tabDeplacement t, char fichier[], int * nb){
     FILE * f;
     char dep;
     *nb = 0;
@@ -137,7 +135,7 @@ void chargerDeplacements(typeDeplacements t, char fichier[], int * nb){
 *        affiché
 * @param zoom qui va répéter les motifs dans un carré de taille zoom 
 */
-void afficher_plateau(t_Plateau plateau,int zoom) {
+void afficher_plateau(t_Plateau plateau) {
   //affichage du plateau
   for (int i = 0; i < TAILLE; i++) {
     for (int j = 0; j < TAILLE; j++) {
@@ -245,10 +243,9 @@ void recherche_sokoban(t_Plateau plateau,int  *lig,int *col){
 *        cibles à l'origine du plateau
 */
 void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
-  char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial) {
+  char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial,int caisse) {
     int di = 0;
     int dj = 0; // Déplacements : i = lignes ; j = colonnes
-    int caisse = 0;
     switch (touche) {
         case HAUT:
           di = -1; 
@@ -272,12 +269,12 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
         return; // Mur : on ne bouge pas
     }
     // Déplacement simple (case vide ou cible)
-    if (target == CHAR_VIDE || target == CHAR_CIBLE) {
+    if (caisse == 0) {
         plateau[ti][tj] = (target == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE :
          CHAR_SOKOBAN; // Mettre à jour la nouvelle position du joueur
     }
     // Tentative de pousser une caisse
-    else if (target == CHAR_CAISSE || target == CHAR_CAISSE_CIBLE) {
+    else if (caisse == 1) {
         int bi = ti + di; // Nouvelle ligne de la caisse
         int bj = tj + dj; // Nouvelle colonne de la caisse
         char beyond = plateau[bi][bj]; // Case au-delà de la caisse
@@ -287,7 +284,6 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
            : CHAR_CAISSE;           // Déplacer la caisse
           plateau[ti][tj] = (target == CHAR_CAISSE_CIBLE) ? CHAR_SOKOBAN_CIBLE
            : CHAR_SOKOBAN; // Mettre à jour la nouvelle position du joueur
-          caisse = 1;//Mettre à jour la variable caisse pour l'enregistrement
         } else {
             return; // Impossible de pousser la caisse
         }
@@ -303,7 +299,6 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
     ? CHAR_CIBLE : CHAR_VIDE;
     *lig = ti; // Mettre à jour les coordonnées 
     *col = tj; //du joueur si le mouvement est valide
-    enregistrer_tab_deplacement(touche, deplacement, caisse, *compteur);
     *compteur=*compteur+1;//augmente le compteur que si le mouvement est valide
 }
 
@@ -321,30 +316,16 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
 * @param deplacement
 */
 void detecter_touche(char touche,int *lig,int *col,int *compteur,
-  t_Plateau plateauInitial,t_Plateau plateau,bool *abandon,int *zoom,
-   t_tabDeplacement deplacement){
+  t_Plateau plateauInitial, t_Plateau plateau, t_tabDeplacement deplacement){
+    int caisse = 0;
     switch(touche){
-    case HAUT:
-    case BAS:
-    case GAUCHE:
-    case DROITE:
-      deplacer(plateau, lig, col, compteur, touche, deplacement, plateauInitial);
-      break;
-    case ABANDONNER: 
-      *abandon = true;
-      break;
-    case ZOOM_MOINS:
-    case ZOOM_PLUS:
-      zoomer(touche, zoom);
-      break;
-    case RECOMMENCER:
-      recommencer(plateauInitial, plateau, compteur, lig, col);
-      break;
-    case ANNULER:
-      if (*compteur > 0) {
-        deplacement_inverse(plateau, lig, col, compteur,
-           deplacement[*compteur - 1], plateauInitial);
-      }
-      break;
+      case HAUT_CAISSE:
+      case GAUCHE_CAISSE:
+      case BAS_CAISSE:
+      case DROITE_CAISSE:
+        touche = tolower(touche);
+        caisse = 1;
+        break;
+    }
+    deplacer(plateau, lig, col, compteur, touche, deplacement, plateauInitial, caisse);
   }
-}
