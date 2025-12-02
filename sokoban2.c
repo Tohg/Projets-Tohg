@@ -47,6 +47,7 @@ void charger_deplacements(t_tabDeplacement t, char fichier[], int * nb);
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
+void detecter_gagne(t_Plateau plateau);
 void deplacer(t_Plateau plateau,int *lig, int *col,int *compteur, 
   char touche,t_tabDeplacement deplacement, t_Plateau plateauInitial,
   int caisse);
@@ -63,6 +64,7 @@ int main() {
   int tailleDep = 0;
   int lig = 0;
   int col = 0;
+  char touche ='/0';
   //definition du plateau
   t_Plateau plateauInitial = {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
   t_tabDeplacement deplacement;
@@ -79,6 +81,8 @@ int main() {
   recherche_sokoban(plateau,&lig, &col);
   // dans la partie
   for (int i=0; i < tailleDep; i++){
+    touche = deplacement[i];
+    detecter_touche(touche,&lig,&col,&compteur,plateauInitial,plateau,deplacement);
     afficher_entete(fichier, compteur);
     afficher_plateau(plateau);
   }
@@ -189,6 +193,17 @@ bool gagne(t_Plateau plateau) {
   }
   return true; //c'est la victoire si il n'y a plus de caisse
 }
+
+void detecter_gagne(t_Plateau plateau){
+  if (gagne(plateau)){
+    printf("Félicitations, les déplacement ammenent à la solution !\n");
+    exit(EXIT_SUCCESS);
+  }
+  else {
+    printf("Les déplacement n'ammenent pas à la solution\n");
+  }
+}
+
 
 /**
 * @brief Permets de copier le plateau1 vers le plateau 2
