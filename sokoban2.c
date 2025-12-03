@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <string.h>
+#include <unistd.h>
 
 //definition des constantes
 #define TAILLE 12
@@ -64,7 +65,7 @@ int main() {
   int tailleDep = 0;
   int lig = 0;
   int col = 0;
-  char touche ='/0';
+  char touche =' ';
   //definition du plateau
   t_Plateau plateauInitial = {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
   t_tabDeplacement deplacement;
@@ -81,12 +82,13 @@ int main() {
   recherche_sokoban(plateau,&lig, &col);
   // dans la partie
   for (int i=0; i < tailleDep; i++){
+    usleep(500000);
     touche = deplacement[i];
     detecter_touche(touche,&lig,&col,&compteur,plateauInitial,plateau,deplacement);
     afficher_entete(fichier, compteur);
     afficher_plateau(plateau);
   }
-  
+  detecter_gagne(plateau);
   return 0;
 }
 
@@ -154,10 +156,10 @@ void afficher_plateau(t_Plateau plateau) {
         // une-cible
         printf("%c", plateau[i][j]);
       }
-    }}
+    }
     printf("\n");
   }
-
+}
 
 /**
 * @brief Affiche l'entete au dessus du plateau avec les informations utiles
