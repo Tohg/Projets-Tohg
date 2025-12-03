@@ -282,6 +282,9 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
     int ti = *lig + di; // Nouvelle ligne cible
     int tj = *col + dj; // Nouvelle colonne cible
     char target = plateau[ti][tj]; // Case cible
+    if ((((target == CHAR_CAISSE)||(target == CHAR_CAISSE_CIBLE))&&(caisse ==1)
+        )||(((target != CHAR_CAISSE)||(target != CHAR_CAISSE_CIBLE))
+        &&(caisse ==0))){
     if (target == CHAR_MUR) { // Vérification si le mouvement est possible
         return; // Mur : on ne bouge pas
     }
@@ -317,6 +320,7 @@ void deplacer(t_Plateau plateau, int *lig, int *col,int *compteur,
     *lig = ti; // Mettre à jour les coordonnées 
     *col = tj; //du joueur si le mouvement est valide
     *compteur=*compteur+1;//augmente le compteur que si le mouvement est valide
+  }
 }
 
 /**
