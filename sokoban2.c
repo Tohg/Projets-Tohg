@@ -55,7 +55,7 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
 void recherche_sokoban(t_Plateau plateau, int *lig, int *col);
 bool obtenir_direction(char touche, int *di, int *dj);
-char obtenir_caractere_affichage(char cible, int caisse);
+char obtenir_caractere_affichage(char cible);
 char obtenir_caractere_ancienne_pos(char original);
 bool verifier_mouvement_valide(char cible, int caisse);
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
@@ -257,15 +257,10 @@ bool obtenir_direction(char touche, int *di, int *dj) {
 /**
  * @brief Récupère le caractère à afficher
  * @param cible le caractère cible
- * @param caisse 1 si caisse, 0 sinon
- * @return le caractère à afficher
+ * @return le caractère à afficher (sokoban seul)
  */
-char obtenir_caractere_affichage(char cible, int caisse) {
-  if (caisse) {
-    return (cible == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
-  } else {
-    return (cible == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
-  }
+char obtenir_caractere_affichage(char cible) {
+  return (cible == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
 }
 
 /**
@@ -335,7 +330,7 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
      CHAR_CAISSE;
   }
   
-  plateau[ti][tj] = obtenir_caractere_affichage(cible, caisse);
+  plateau[ti][tj] = obtenir_caractere_affichage(cible);
   plateau[ancienne_lig][ancienne_col] =
     obtenir_caractere_ancienne_pos(plateauInitial[ancienne_lig][ancienne_col]);
   
