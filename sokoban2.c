@@ -204,6 +204,7 @@ bool gagne(t_Plateau plateau) {
  * @brief Affiche le résultat final et quitte le programme
  * @param plateau le plateau final à vérifier
  */
+void detecter_gagne(t_Plateau plateau) {
   if (gagne(plateau)) {
     printf("Félicitations, les déplacements amènent "
            "à la solution !\n");
