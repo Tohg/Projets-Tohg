@@ -320,6 +320,10 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
   if (!verifier_mouvement_valide(cible, caisse))
     return;
   
+  // Sauvegarder l'ancienne position avant mise à jour
+  int ancienne_lig = *lig;
+  int ancienne_col = *col;
+  
   // Pousser une caisse si nécessaire
   if (caisse == 1) {
     int bi = ti + di;
@@ -332,8 +336,8 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
   }
   
   plateau[ti][tj] = obtenir_caractere_affichage(cible, caisse);
-  plateau[*lig][*col] =
-    obtenir_caractere_ancienne_pos(plateauInitial[*lig][*col]);
+  plateau[ancienne_lig][ancienne_col] =
+    obtenir_caractere_ancienne_pos(plateauInitial[ancienne_lig][ancienne_col]);
   
   *lig = ti;
   *col = tj;
