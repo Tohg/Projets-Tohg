@@ -327,7 +327,8 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
     char au_dela = plateau[bi][bj];
     if (au_dela != CHAR_VIDE && au_dela != CHAR_CIBLE)
       return;
-    plateau[bi][bj] = (au_dela == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE : CHAR_CAISSE;
+    plateau[bi][bj] = (au_dela == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE :
+     CHAR_CAISSE;
   }
   
   plateau[ti][tj] = obtenir_caractere_affichage(cible, caisse);
