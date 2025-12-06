@@ -12,15 +12,11 @@
  *
  */
 
-#include <fcntl.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <string.h>
-#include <unistd.h>
 
 //definition des constantes
 #define TAILLE 12
@@ -43,24 +39,35 @@ const char CHAR_CAISSE = '$';
 
 typedef char t_Plateau[TAILLE][TAILLE];
 typedef char t_tabDeplacement[MOUVEMENT];
+/**
+ * @brief Charge le plateau de jeu depuis un fichier
+ * @param plateau tableau 2D à remplir (12x12 caractères)
+ * @param fichier nom du fichier contenant le plateau
+ */
 void charger_partie(t_Plateau plateau, char fichier[15]);
-void charger_deplacements(t_tabDeplacement t, char fichier[], int *nb);
+/**
+ * @brief Charge la séquence de déplacements depuis un fichier
+ * @param t tableau à remplir avec les touches de déplacement
+ * @param fichier nom du fichier contenant les mouvements
+ * @param nb pointeur pour stocker le nombre de mouvements lus
+ */
+void charger_deplacements(t_tabDeplacement t, char fichier[],
+                          int *nb);
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
 void detecter_gagne(t_Plateau plateau);
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
-              char touche, t_tabDeplacement deplacement,
-              t_Plateau plateauInitial, int caisse);
+              char touche, t_Plateau plateauInitial, int caisse);
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
 void recherche_sokoban(t_Plateau plateau, int *lig, int *col);
+bool verifier_mouvement_valide(char cible, int caisse);
 bool obtenir_direction(char touche, int *di, int *dj);
 char obtenir_caractere_affichage(char cible);
 char obtenir_caractere_ancienne_pos(char original);
 bool verifier_mouvement_valide(char cible, int caisse);
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
-                     t_Plateau plateauInitial, t_Plateau plateau,
-                     t_tabDeplacement deplacement);
+                     t_Plateau plateauInitial, t_Plateau plateau);
 
 int main() {
   //definition des variables
@@ -90,7 +97,7 @@ int main() {
     usleep(500000);
     touche = deplacement[i];
     detecter_touche(touche, &lig, &col, &compteur,
-                    plateauInitial, plateau, deplacement);
+            plateauInitial, plateau);
     afficher_entete(fichier, compteur);
     afficher_plateau(plateau);
   }
@@ -144,7 +151,7 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
 /**
  * @brief Affiche le plateau en remplaçant les caisses/sokoban
  *        sur cible par leurs symboles normaux
- * @param plateau le plateau à afficher
+ * @param plateau le plateau à afficher (12x12)
  */
 void afficher_plateau(t_Plateau plateau) {
   for (int i = 0; i < TAILLE; i++) {
@@ -177,9 +184,10 @@ void afficher_entete(char fichier[], int compteur) {
 }
 
 /**
- * @brief Détecte si le joueur a gagné ou pas
+ * @brief Vérifie si la partie est gagnée
  * @param plateau le plateau à vérifier
- * @return True si gagné, False sinon
+ * @return true si aucune caisse seule n'existe
+ * @return false s'il reste au moins une caisse non placée
  */
 bool gagne(t_Plateau plateau) {
   for (int i = 0; i < TAILLE; i++) {
@@ -192,7 +200,10 @@ bool gagne(t_Plateau plateau) {
   return true; // C'est la victoire si il n'y a plus de caisse
 }
 
-void detecter_gagne(t_Plateau plateau) {
+/**
+ * @brief Affiche le résultat final et quitte le programme
+ * @param plateau le plateau final à vérifier
+ */
   if (gagne(plateau)) {
     printf("Félicitations, les déplacements amènent "
            "à la solution !\n");
@@ -206,8 +217,8 @@ void detecter_gagne(t_Plateau plateau) {
 
 /**
  * @brief Copie le plateau1 vers le plateau 2
- * @param plateau1 plateau source
- * @param plateau2 plateau destination
+ * @param plateau1 plateau source à copier
+ * @param plateau2 plateau destination (12x12)
  */
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2) {
   for (int i = 0; i < TAILLE; i++) {
@@ -218,10 +229,10 @@ void copie_plateau(t_Plateau plateau1, t_Plateau plateau2) {
 }
 
 /**
- * @brief Trouve la position de sokoban
- * @param plateau le plateau à fouiller
- * @param lig pointeur de ligne
- * @param col pointeur de colonne
+ * @brief Trouve la position actuelle de sokoban
+ * @param plateau le plateau à fouiller (12x12)
+ * @param lig pointeur où stocker la ligne trouvée
+ * @param col pointeur où stocker la colonne trouvée
  */
 void recherche_sokoban(t_Plateau plateau, int *lig, int *col) {
   for (int i = 0; i < TAILLE; i++) {
@@ -236,11 +247,12 @@ void recherche_sokoban(t_Plateau plateau, int *lig, int *col) {
 }
 
 /**
- * @brief Récupère les déplacements basés sur la touche
- * @param touche la touche pressée
- * @param di pointeur déplacement ligne
- * @param dj pointeur déplacement colonne
- * @return true si touche valide
+ * @brief Récupère les déplacements (di, dj) basés sur la touche
+ * @param touche le caractère représentant la direction
+ * @param di pointeur déplacement en ligne (-1=haut, +1=bas, 0=autre)
+ * @param dj pointeur déplacement en colonne (-1=gauche, +1=droite)
+ * @return true si la touche correspond à une direction valide
+ * @return false pour touche invalide ou non reconnue
  */
 bool obtenir_direction(char touche, int *di, int *dj) {
   *di = 0;
@@ -255,18 +267,20 @@ bool obtenir_direction(char touche, int *di, int *dj) {
 }
 
 /**
- * @brief Récupère le caractère à afficher
- * @param cible le caractère cible
- * @return le caractère à afficher (sokoban seul)
+ * @brief Récupère le caractère à afficher pour sokoban
+ * @param cible le caractère trouvé à la nouvelle position
+ * @return CHAR_SOKOBAN_CIBLE (+) si cible était une cible
+ * @return CHAR_SOKOBAN (@) sinon
  */
 char obtenir_caractere_affichage(char cible) {
   return (cible == CHAR_CIBLE) ? CHAR_SOKOBAN_CIBLE : CHAR_SOKOBAN;
 }
 
 /**
- * @brief Récupère le caractère pour l'ancienne position
- * @param original le caractère original
- * @return CHAR_CIBLE ou CHAR_VIDE
+ * @brief Récupère le caractère pour l'ancienne position de sokoban
+ * @param original le caractère original du plateau initial
+ * @return CHAR_CIBLE (.) si c'était une zone de cible
+ * @return CHAR_VIDE ( ) sinon
  */
 char obtenir_caractere_ancienne_pos(char original) {
   return (original == CHAR_CIBLE || 
@@ -275,10 +289,11 @@ char obtenir_caractere_ancienne_pos(char original) {
 }
 
 /**
- * @brief Vérifie si le mouvement est autorisé
- * @param cible la case cible
- * @param caisse 1 pour pousser caisse, 0 sinon
- * @return true si autorisé
+ * @brief Vérifie si le mouvement vers la case est autorisé
+ * @param cible le caractère trouvé à la case cible
+ * @param caisse 1 si on essaie de pousser une caisse, 0 pour se déplacer
+ * @return true si le mouvement est autorisé
+ * @return false si impossible (mur, mauvais type de caisse, etc.)
  */
 bool verifier_mouvement_valide(char cible, int caisse) {
   if (cible == CHAR_MUR) return false;
@@ -290,19 +305,17 @@ bool verifier_mouvement_valide(char cible, int caisse) {
 }
 
 /**
- * @brief Déplace sokoban en fonction de la touche
- * @param plateau plateau mis à jour
- * @param lig pointeur position ligne
- * @param col pointeur position colonne
- * @param compteur pointeur compteur de coups
- * @param touche direction du mouvement
- * @param deplacement inutilisé
- * @param plateauInitial plateau initial
- * @param caisse 1 pour pousser caisse
+ * @brief Déplace sokoban en fonction de la touche pressée
+ * @param plateau le plateau modifié en place
+ * @param lig pointeur position ligne actuelle (mise à jour)
+ * @param col pointeur position colonne actuelle (mise à jour)
+ * @param compteur pointeur compteur de coups (incrémenté)
+ * @param touche caractère de direction (h/b/g/d)
+ * @param plateauInitial plateau initial pour vérifier les cibles
+ * @param caisse 1 pour pousser une caisse, 0 pour se déplacer seul
  */
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
-              char touche, t_tabDeplacement deplacement,
-              t_Plateau plateauInitial, int caisse) {
+              char touche, t_Plateau plateauInitial, int caisse) {
   int di = 0, dj = 0;
   
   if (!obtenir_direction(touche, &di, &dj))
@@ -340,18 +353,16 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
 }
 
 /**
- * @brief Redirige vers les procédures adaptées
- * @param touche la touche pressée
- * @param lig pointeur ligne sokoban
- * @param col pointeur colonne sokoban
- * @param compteur pointeur compteur coup
- * @param plateauInitial plateau initial
- * @param plateau plateau courant
- * @param deplacement déplacements
+ * @brief Analyse la touche et appelle deplacer avec les bon paramètres
+ * @param touche le caractère de touche lu (h/H/b/B/g/G/d/D)
+ * @param lig pointeur position ligne sokoban (mise à jour)
+ * @param col pointeur position colonne sokoban (mise à jour)
+ * @param compteur pointeur compteur coup (mise à jour)
+ * @param plateauInitial plateau initial (référence)
+ * @param plateau plateau courant (modifié)
  */
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
-                     t_Plateau plateauInitial, t_Plateau plateau,
-                     t_tabDeplacement deplacement) {
+                     t_Plateau plateauInitial, t_Plateau plateau) {
   int caisse = 0;
   
   switch (touche) {
@@ -364,6 +375,5 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
       break;
   }
   
-  deplacer(plateau, lig, col, compteur, touche, deplacement, 
-           plateauInitial, caisse);
+  deplacer(plateau, lig, col, compteur, touche, plateauInitial, caisse);
 }
