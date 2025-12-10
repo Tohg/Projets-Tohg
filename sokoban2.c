@@ -36,27 +36,20 @@ const char CHAR_CAISSE = '$';
 #define GAUCHE_CAISSE 'G'
 #define BAS_CAISSE 'B'
 #define DROITE_CAISSE 'D'
+#define TEMPS 250000
 
+ //définition des types
 typedef char t_Plateau[TAILLE][TAILLE];
 typedef char t_tabDeplacement[MOUVEMENT];
-/**
- * @brief Charge le plateau de jeu depuis un fichier
- * @param plateau tableau 2D à remplir (12x12 caractères)
- * @param fichier nom du fichier contenant le plateau
- */
+
+//définition des procédures et fonctions
 void charger_partie(t_Plateau plateau, char fichier[15]);
-/**
- * @brief Charge la séquence de déplacements depuis un fichier
- * @param t tableau à remplir avec les touches de déplacement
- * @param fichier nom du fichier contenant les mouvements
- * @param nb pointeur pour stocker le nombre de mouvements lus
- */
 void charger_deplacements(t_tabDeplacement t, char fichier[],
                           int *nb);
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
-void detecter_gagne(t_Plateau plateau);
+void detecter_gagne(t_Plateau plateau, int compteur, char fichier[], char deplacement);
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
               char touche, t_Plateau plateauInitial, int caisse);
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
@@ -78,33 +71,42 @@ int main() {
   int lig = 0;
   int col = 0;
   char touche =' ';
+  
   //definition du plateau
   t_Plateau plateauInitial = {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
   t_tabDeplacement deplacement;
   printf("Quelle fichier de partie : ");
   scanf("%14s", fichier);
   charger_partie(plateauInitial, fichier);
+
   //definition des déplacement
   printf("Quel fichier de déplacement : ");
   scanf("%14s", nomdeplacement);
   charger_deplacements(deplacement,nomdeplacement,&tailleDep);
+
   //copie du niveau
   t_Plateau plateau;
   copie_plateau(plateauInitial,plateau);
   recherche_sokoban(plateau,&lig, &col);
+
   // dans la partie
   for (int i = 0; i < tailleDep; i++) {
-    usleep(500000);
+    usleep(TEMPS);
     touche = deplacement[i];
     detecter_touche(touche, &lig, &col, &compteur,
             plateauInitial, plateau);
     afficher_entete(fichier, compteur);
     afficher_plateau(plateau);
   }
-  detecter_gagne(plateau);
+  detecter_gagne(plateau,compteur,fichier,nomdeplacement);
   return 0;
 }
 
+/**
+ * @brief Charge le plateau de jeu depuis un fichier
+ * @param plateau tableau 2D à remplir (12x12 caractères)
+ * @param fichier nom du fichier contenant le plateau
+ */
 void charger_partie(t_Plateau plateau, char fichier[15]) {
   FILE *f;
   char finDeLigne;
@@ -124,6 +126,12 @@ void charger_partie(t_Plateau plateau, char fichier[15]) {
   }
 }
 
+/**
+ * @brief Charge la séquence de déplacements depuis un fichier
+ * @param t tableau à remplir avec les touches de déplacement
+ * @param fichier nom du fichier contenant les mouvements
+ * @param nb pointeur pour stocker le nombre de mouvements lus
+ */
 void charger_deplacements(t_tabDeplacement t, char fichier[],
                           int *nb) {
   FILE *f;
@@ -204,14 +212,16 @@ bool gagne(t_Plateau plateau) {
  * @brief Affiche le résultat final et quitte le programme
  * @param plateau le plateau final à vérifier
  */
-void detecter_gagne(t_Plateau plateau) {
+void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
+   char deplacement[]) {
   if (gagne(plateau)) {
-    printf("Félicitations, les déplacements amènent "
-           "à la solution !\n");
+    printf("La suite de déplacements %s est bien une solution pour 
+      la partie %s. \n\nElle contient %d déplacements\n", fichier, 
+      deplacement, compteur);
     exit(EXIT_SUCCESS);
   } else {
-    printf("Les déplacements n'amènent pas "
-           "à la solution\n");
+    printf("La suite de déplacement %s N'EST PAS une solution pour la
+       partie %s.\n", fichier, compteur);
   }
 }
 
