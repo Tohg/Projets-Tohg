@@ -21,6 +21,7 @@
 //definition des constantes
 #define TAILLE 12
 #define MOUVEMENT 1000
+#define FICHIER_BUFFER 15
 const char CHAR_SOKOBAN = '@';
 #define CHAR_MUR '#'
 const char CHAR_CAISSE = '$';
@@ -49,7 +50,7 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
-void detecter_gagne(t_Plateau plateau, int compteur, char fichier[], char deplacement);
+void detecter_gagne(t_Plateau plateau, int compteur, char fichier[], char deplacement[]);
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
               char touche, t_Plateau plateauInitial, int caisse);
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
@@ -64,24 +65,24 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
 
 int main() {
   //definition des variables
-  char fichier[15];
-  char nomdeplacement[15];
+  char fichier[FICHIER_BUFFER];
+  char nomdeplacement[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
   int lig = 0;
   int col = 0;
   char touche =' ';
-  
+
   //definition du plateau
   t_Plateau plateauInitial = {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
   t_tabDeplacement deplacement;
   printf("Quelle fichier de partie : ");
-  scanf("%14s", fichier);
+  scanf("%s", fichier);
   charger_partie(plateauInitial, fichier);
 
   //definition des déplacement
   printf("Quel fichier de déplacement : ");
-  scanf("%14s", nomdeplacement);
+  scanf("%s", nomdeplacement);
   charger_deplacements(deplacement,nomdeplacement,&tailleDep);
 
   //copie du niveau
@@ -98,7 +99,7 @@ int main() {
     afficher_entete(fichier, compteur);
     afficher_plateau(plateau);
   }
-  detecter_gagne(plateau,compteur,fichier,nomdeplacement);
+  detecter_gagne(plateau,compteur, fichier, nomdeplacement);
   return 0;
 }
 
@@ -215,13 +216,11 @@ bool gagne(t_Plateau plateau) {
 void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
    char deplacement[]) {
   if (gagne(plateau)) {
-    printf("La suite de déplacements %s est bien une solution pour 
-      la partie %s. \n\nElle contient %d déplacements\n", fichier, 
-      deplacement, compteur);
-    exit(EXIT_SUCCESS);
+    printf("La suite de déplacements %s est bien une solution ", fichier);
+    printf("pour la partie %s. \n\nElle contient %d déplacements\n", deplacement, compteur);
   } else {
-    printf("La suite de déplacement %s N'EST PAS une solution pour la
-       partie %s.\n", fichier, compteur);
+    printf("La suite de déplacement %s N'EST ", deplacement);
+    printf("PAS une solution pour la partie %s .\n", fichier);
   }
 }
 
