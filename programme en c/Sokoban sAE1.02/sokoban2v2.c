@@ -63,12 +63,16 @@ char obtenir_caractere_ancienne_pos(char original);
 bool verifier_mouvement_valide(char cible, int caisse);
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
                      t_Plateau plateauInitial, t_Plateau plateau);
-void supprimer_caractere (char * deplacements, int position);
+void supprimer_caractere (char deplacements, int position);
+void retenir_position(char aSupprimer[], int tailleDep);
+void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]);
+
 
 int main() {
   //definition des variables
   char fichier[FICHIER_BUFFER];
   char nomdeplacement[FICHIER_BUFFER];
+  char copiedeplacement[FICHIER_BUFFER];
   int aSupprimer[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
@@ -393,8 +397,28 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
 }
 
 
-void supprimer_caractere (char * deplacements, int position){
+void supprimer_caractere (char deplacements, int position){
     for (int i = position; deplacements[i] != '\0'; i++) {
         deplacements[i] = deplacements[i + 1];
     }
+}
+
+void retenir_position(char aSupprimer[], int tailleDep){
+  for (int i; aSupprimer[i] != '\0'; i++){} // aller jusqu'au caractere vide le plus proche
+  aSupprimer[i] = tailleDep;
+}
+
+void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]){
+  char temp[FICHIER_BUFFER];
+  for (int i=0; aSupprimer[i] != '\0' ;i++){
+    copiedeplacement[aSupprimer[i]] = 0;
+  }
+  for (int i=0; copiedeplacement[i] != '\0';i++){
+    if (copiedeplacement[i] != 0){
+      for (int j=0; temp[j] != '\0'; j++){
+        temp[j] = copiedeplacement[i];
+      }
+    }
+  }
+  strcpy(copiedeplacement,temp);
 }
