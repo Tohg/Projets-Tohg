@@ -69,7 +69,7 @@ int main() {
   //definition des variables
   char fichier[FICHIER_BUFFER];
   char nomdeplacement[FICHIER_BUFFER];
-  char copiedeplacement[FICHIER_BUFFER];
+  int aSupprimer[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
   int lig = 0;
