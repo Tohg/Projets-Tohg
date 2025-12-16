@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <string.h>
 
 //definition des constantes
 #define TAILLE 12
@@ -62,11 +63,13 @@ char obtenir_caractere_ancienne_pos(char original);
 bool verifier_mouvement_valide(char cible, int caisse);
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
                      t_Plateau plateauInitial, t_Plateau plateau);
+void supprimer_caractere (char * deplacements, int position);
 
 int main() {
   //definition des variables
   char fichier[FICHIER_BUFFER];
   char nomdeplacement[FICHIER_BUFFER];
+  char copiedeplacement[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
   int lig = 0;
@@ -84,6 +87,7 @@ int main() {
   printf("Quel fichier de déplacement : ");
   scanf("%s", nomdeplacement);
   charger_deplacements(deplacement,nomdeplacement,&tailleDep);
+  strcpy(copiedeplacement, deplacement);
 
   //copie du niveau
   t_Plateau plateau;
@@ -386,4 +390,11 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
   }
   
   deplacer(plateau, lig, col, compteur, touche, plateauInitial, caisse);
+}
+
+
+void supprimer_caractere (char * deplacements, int position){
+    for (int i = position; deplacements[i] != '\0'; i++) {
+        deplacements[i] = deplacements[i + 1];
+    }
 }
