@@ -39,6 +39,10 @@ const char CHAR_CAISSE = '$';
 #define BAS_CAISSE 'B'
 #define DROITE_CAISSE 'D'
 #define TEMPS 250000
+#define UP +1
+#define DOWN -1
+#define LEFT -2
+#define RIGHT +2
 
  //définition des types
 typedef char t_Plateau[TAILLE][TAILLE];
@@ -66,6 +70,7 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
 void supprimer_caractere (char deplacements, int position);
 void retenir_position(char aSupprimer[], int tailleDep);
 void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]);
+int somme_deplacement(char seiezz);
 
 
 int main() {
@@ -422,3 +427,35 @@ void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]){
   }
   strcpy(copiedeplacement,temp);
 }
+
+void sequence_inutile(char copiedeplacement[]){
+  for (int i=0; copiedeplacement[i] != '\0'; i++){
+
+  }
+}
+
+int somme_deplacement(char seiezz){
+  int total = 0;
+  for (int i=0; seiezz[i] !=  '\0'; i++){
+    switch (seiezz[i]){
+      case haut : total = total UP; break;
+      case gauche : total = total LEFT; break;
+      case droite : total = total RIGHT; break;
+      case bas : total = total DOWN; break;
+      default : total = total; break;
+    }
+  }
+  return total;
+}
+
+//vérif
+//(boucle 1)
+//I -> II 
+//I -> ...
+//I -> X 
+//(boucle 2)
+//II -> III 
+//II -> ...
+//II -> X
+//
+//^- SI Y A 0, on supprime l'entre truc
