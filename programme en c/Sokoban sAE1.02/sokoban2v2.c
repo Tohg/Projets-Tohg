@@ -77,7 +77,7 @@ int main() {
   //definition des variables
   char fichier[FICHIER_BUFFER];
   char nomdeplacement[FICHIER_BUFFER];
-  char copiedeplacement[FICHIER_BUFFER];
+  char copiedeplacement[MOUVEMENT];
   int aSupprimer[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
@@ -414,7 +414,7 @@ void retenir_position(char aSupprimer[], int tailleDep){
 }
 
 void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]){
-  char temp[FICHIER_BUFFER];
+  char temp[MOUVEMENT];
   for (int i=0; aSupprimer[i] != '\0' ;i++){
     copiedeplacement[aSupprimer[i]] = 0;
   }
@@ -428,9 +428,11 @@ void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]){
   strcpy(copiedeplacement,temp);
 }
 
-void sequence_inutile(char copiedeplacement[]){
+void sequence_inutile(char copiedeplacement[],char aSupprimer[]){
   for (int i=0; copiedeplacement[i] != '\0'; i++){
-
+    if ((copiedeplacement[i] != HAUT)&&(copiedeplacement[i] != GAUCHE)&&(copiedeplacement[i] != DROITE) && (copiedeplacement[i] != BAS)){
+      voir_fin_sequence(i, copiedeplacement, aSupprimer);
+    }
   }
 }
 
@@ -448,14 +450,50 @@ int somme_deplacement(char seiezz){
   return total;
 }
 
-//vérif
-//(boucle 1)
-//I -> II 
-//I -> ...
-//I -> X 
-//(boucle 2)
-//II -> III 
-//II -> ...
-//II -> X
-//
-//^- SI Y A 0, on supprime l'entre truc
+void voir_fin_sequence(int i, char copie_deplacement[], char aSupprimer[]){
+  for (int j=0; (copiedeplacement[i+j] != HAUT)&&(copiedeplacement[i+j] != GAUCHE)&&(copiedeplacement[i+j] != DROITE) && (copiedeplacement[i+j] != BAS) && (copiedeplacement[i+j] != '\0')){
+        char sequence[j+1];
+        creation_sequence(i, i+j, copiedeplacement, sequence);
+        if (somme_deplacement(sequence) == 0){
+          for (int l = 0; l < (j+1); l++){
+            retenir_position(aSupprimer,l);
+          }
+        }
+      }
+}
+
+
+void creation_sequence(int debut, int fin, char copiedeplacement[], char sequence[]){
+  int ecart = fin - debut + 1;
+  for (int i = 0; i < ecart, i++){
+    sequence[i] = copiedeplacement[debut + i];
+  }
+}
+
+void trier_unifier(char aSupprimer[]){
+  int c;
+  //phase tri
+  for (int compteur = 0; aSupprimer[compteur]!= '\0'; compteur++){}
+  for(int j=1;j<=compteur;j++) 
+    for(int i=0;i<compteur-1;i++)
+        if ( aSupprimer[i] > aSupprimer[i+1] ) {
+                c = aSupprimer[i];
+                aSupprimer[i] = aSupprimer[i+1];
+                aSupprimer[i+1] = c;
+        } 
+  //phase unification
+  for (i=0; i<compteur; i++){
+    if (aSupprimer[i+1] == aSupprimer[i]){
+      aSupprimer[i] = 0;
+    }
+  }
+  char copie[compteur];
+  c = 0;
+  for (int i = 0; i < compteur; i++){
+    if(aSupprimer[i] != 0){
+      copie[c] = aSupprimer[i];
+      c++;
+    }
+  }
+  strcpy(aSupprimer,copie);
+}
