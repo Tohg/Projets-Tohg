@@ -71,6 +71,9 @@ void supprimer_caractere (char deplacements, int position);
 void retenir_position(char aSupprimer[], int tailleDep);
 void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]);
 int somme_deplacement(char seiezz);
+void trier_unifier(char aSupprimer[]);
+void creation_sequence(int debut, int fin, char copiedeplacement[], char sequence[]);
+void voir_fin_sequence(int i, char copie_deplacement[], char aSupprimer[]);
 
 
 int main() {
@@ -96,7 +99,7 @@ int main() {
   printf("Quel fichier de déplacement : ");
   scanf("%s", nomdeplacement);
   charger_deplacements(deplacement,nomdeplacement,&tailleDep);
-  strcpy(copiedeplacement, deplacement);
+  strncpy(copiedeplacement, deplacement);
 
   //copie du niveau
   t_Plateau plateau;
@@ -495,5 +498,5 @@ void trier_unifier(char aSupprimer[]){
       c++;
     }
   }
-  strcpy(aSupprimer,copie);
+  strncpy(aSupprimer,copie);
 }
