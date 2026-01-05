@@ -69,18 +69,18 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
                      t_Plateau plateauInitial, t_Plateau plateau);
 void supprimer_caractere (char deplacements, int position);
 void retenir_position(char aSupprimer[], int tailleDep);
-void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]);
-int somme_deplacement(char seiezz);
+void suppression_tous_caractere(char  aSupprimer[], char copieDeplacement[]);
+int somme_deplacement(char *depCalcul);
 void trier_unifier(char aSupprimer[]);
-void creation_sequence(int debut, int fin, char copiedeplacement[], char sequence[]);
-void voir_fin_sequence(int i, char copie_deplacement[], char aSupprimer[]);
+void creation_sequence(int debut, int fin, char copieDeplacement[], char sequence[]);
+void voir_fin_sequence(int i, char copieDeplacement[], char aSupprimer[]);
 
 
 int main() {
   //definition des variables
   char fichier[FICHIER_BUFFER];
   char nomdeplacement[FICHIER_BUFFER];
-  char copiedeplacement[MOUVEMENT];
+  char copieDeplacement[MOUVEMENT];
   int aSupprimer[FICHIER_BUFFER];
   int compteur = 0;
   int tailleDep = 0;
@@ -99,7 +99,7 @@ int main() {
   printf("Quel fichier de déplacement : ");
   scanf("%s", nomdeplacement);
   charger_deplacements(deplacement,nomdeplacement,&tailleDep);
-  strncpy(copiedeplacement, deplacement);
+  strncpy(copieDeplacement, deplacement, MOUVEMENT);
 
   //copie du niveau
   t_Plateau plateau;
@@ -416,47 +416,47 @@ void retenir_position(char aSupprimer[], int tailleDep){
   aSupprimer[i] = tailleDep;
 }
 
-void suppression_tous_caractere(char  aSupprimer[], char copiedeplacement[]){
+void suppression_tous_caractere(char  aSupprimer[], char copieDeplacement[]){
   char temp[MOUVEMENT];
   for (int i=0; aSupprimer[i] != '\0' ;i++){
-    copiedeplacement[aSupprimer[i]] = 0;
+    copieDeplacement[aSupprimer[i]] = 0;
   }
-  for (int i=0; copiedeplacement[i] != '\0';i++){
-    if (copiedeplacement[i] != 0){
+  for (int i=0; copieDeplacement[i] != '\0';i++){
+    if (copieDeplacement[i] != 0){
       for (int j=0; temp[j] != '\0'; j++){
-        temp[j] = copiedeplacement[i];
+        temp[j] = copieDeplacement[i];
       }
     }
   }
-  strcpy(copiedeplacement,temp);
+  strcpy(copieDeplacement,temp);
 }
 
-void sequence_inutile(char copiedeplacement[],char aSupprimer[]){
-  for (int i=0; copiedeplacement[i] != '\0'; i++){
-    if ((copiedeplacement[i] != HAUT)&&(copiedeplacement[i] != GAUCHE)&&(copiedeplacement[i] != DROITE) && (copiedeplacement[i] != BAS)){
-      voir_fin_sequence(i, copiedeplacement, aSupprimer);
+void sequence_inutile(char copieDeplacement[],char aSupprimer[]){
+  for (int i=0; copieDeplacement[i] != '\0'; i++){
+    if ((copieDeplacement[i] != HAUT)&&(copieDeplacement[i] != GAUCHE)&&(copieDeplacement[i] != DROITE) && (copieDeplacement[i] != BAS)){
+      voir_fin_sequence(i, copieDeplacement, aSupprimer);
     }
   }
 }
 
-int somme_deplacement(char seiezz){
+int somme_deplacement(char *depCalcul){
   int total = 0;
-  for (int i=0; seiezz[i] !=  '\0'; i++){
-    switch (seiezz[i]){
-      case haut : total = total UP; break;
-      case gauche : total = total LEFT; break;
-      case droite : total = total RIGHT; break;
-      case bas : total = total DOWN; break;
+  for (int i=0; depCalcul[i] !=  '\0'; i++){
+    switch (depCalcul[i]){
+      case HAUT : total = total UP; break;
+      case GAUCHE : total = total LEFT; break;
+      case DROITE : total = total RIGHT; break;
+      case BAS : total = total DOWN; break;
       default : total = total; break;
     }
   }
   return total;
 }
 
-void voir_fin_sequence(int i, char copie_deplacement[], char aSupprimer[]){
-  for (int j=0; (copiedeplacement[i+j] != HAUT)&&(copiedeplacement[i+j] != GAUCHE)&&(copiedeplacement[i+j] != DROITE) && (copiedeplacement[i+j] != BAS) && (copiedeplacement[i+j] != '\0')){
+void voir_fin_sequence(int i, char copieDeplacement[], char aSupprimer[]){
+  for (int j=0; (copieDeplacement[i+j] != HAUT)&&(copieDeplacement[i+j] != GAUCHE)&&(copieDeplacement[i+j] != DROITE) && (copieDeplacement[i+j] != BAS) && (copieDeplacement[i+j] != '\0');){
         char sequence[j+1];
-        creation_sequence(i, i+j, copiedeplacement, sequence);
+        creation_sequence(i, i+j, copieDeplacement, sequence);
         if (somme_deplacement(sequence) == 0){
           for (int l = 0; l < (j+1); l++){
             retenir_position(aSupprimer,l);
@@ -466,37 +466,40 @@ void voir_fin_sequence(int i, char copie_deplacement[], char aSupprimer[]){
 }
 
 
-void creation_sequence(int debut, int fin, char copiedeplacement[], char sequence[]){
+void creation_sequence(int debut, int fin, char copieDeplacement[], char sequence[]){
   int ecart = fin - debut + 1;
-  for (int i = 0; i < ecart, i++){
-    sequence[i] = copiedeplacement[debut + i];
+  for (int i = 0; i < ecart; i++){
+    sequence[i] = copieDeplacement[debut + i];
   }
 }
 
 void trier_unifier(char aSupprimer[]){
   int c;
   //phase tri
-  for (int compteur = 0; aSupprimer[compteur]!= '\0'; compteur++){}
-  for(int j=1;j<=compteur;j++) 
-    for(int i=0;i<compteur-1;i++)
+  int tailleD = 0; 
+  for (int compteur = 0; aSupprimer[compteur]!= '\0'; compteur++){
+    tailleD++;
+  }
+  for(int j=1;j<=tailleD;j++) 
+    for(int i=0;i<tailleD-1;i++)
         if ( aSupprimer[i] > aSupprimer[i+1] ) {
                 c = aSupprimer[i];
                 aSupprimer[i] = aSupprimer[i+1];
                 aSupprimer[i+1] = c;
         } 
   //phase unification
-  for (i=0; i<compteur; i++){
+  for (int i=0; i<tailleD; i++){
     if (aSupprimer[i+1] == aSupprimer[i]){
       aSupprimer[i] = 0;
     }
   }
-  char copie[compteur];
+  char copie[tailleD];
   c = 0;
-  for (int i = 0; i < compteur; i++){
+  for (int i = 0; i < tailleD; i++){
     if(aSupprimer[i] != 0){
       copie[c] = aSupprimer[i];
       c++;
     }
   }
-  strncpy(aSupprimer,copie);
+  strncpy(aSupprimer,copie,MOUVEMENT);
 }
