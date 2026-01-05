@@ -404,13 +404,22 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
   deplacer(plateau, lig, col, compteur, touche, plateauInitial, caisse);
 }
 
-
+/**
+* @brief supprime le caractere à la position donnée dans deplacements
+* @param position donne la position du caractere à supprimer
+* @param deplacements suite de déplacement donné
+*/
 void supprimer_caractere (char deplacements, int position){
     for (int i = position; deplacements[i] != '\0'; i++) {
         deplacements[i] = deplacements[i + 1];
     }
 }
 
+/**
+* @brief dans un tab deplacement, rentre une position à se souvenir
+*
+*
+ */
 void retenir_position(char aSupprimer[], int tailleDep){
   for (int i; aSupprimer[i] != '\0'; i++){} // aller jusqu'au caractere vide le plus proche
   aSupprimer[i] = tailleDep;
