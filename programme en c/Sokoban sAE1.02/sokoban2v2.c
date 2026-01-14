@@ -71,7 +71,6 @@ void supprimer_caractere (char deplacements, int position);
 void retenir_position(char aSupprimer[], int tailleDep);
 void suppression_tous_caractere(char  aSupprimer[], char copieDeplacement[]);
 int somme_deplacement(char *depCalcul);
-void trier_unifier(char aSupprimer[]);
 void creation_sequence(int debut, int fin, char copieDeplacement[], char sequence[]);
 void voir_fin_sequence(int i, char copieDeplacement[], char aSupprimer[]);
 
@@ -410,23 +409,24 @@ void detecter_touche(char touche, int *lig, int *col, int *compteur,
 * @param deplacements suite de déplacement donné
 */
 void supprimer_caractere (char deplacements, int position){
-    for (int i = position; deplacements[i] != '\0'; i++) {
-        deplacements[i] = deplacements[i + 1];
-    }
+  int i = position;
+  for ( deplacements[i] != '\0'; i++;) {
+    deplacements[i] = deplacements[i + 1];
+  }
 }
 
 /**
 * @brief dans un tab deplacement, rentre une position à se souvenir
-*
-*
+* @param aSupprimer tableau de caractere dans lequel on se souvient de la position
+* @param tailleDep 
  */
 void retenir_position(char aSupprimer[], int tailleDep){
   for (int i; aSupprimer[i] != '\0'; i++){} // aller jusqu'au caractere vide le plus proche
   aSupprimer[i] = tailleDep;
 }
 
-void suppression_tous_caractere(char  aSupprimer[], char copieDeplacement[]){
-  char temp[MOUVEMENT];
+void suppression_tous_caractere(char aSupprimer[], char copieDeplacement[]){
+  t_tabDeplacement temp;
   for (int i=0; aSupprimer[i] != '\0' ;i++){
     copieDeplacement[aSupprimer[i]] = 0;
   }
@@ -463,52 +463,23 @@ int somme_deplacement(char *depCalcul){
 }
 
 void voir_fin_sequence(int i, char copieDeplacement[], char aSupprimer[]){
-  for (int j=0; (copieDeplacement[i+j] != HAUT)&&(copieDeplacement[i+j] != GAUCHE)&&(copieDeplacement[i+j] != DROITE) && (copieDeplacement[i+j] != BAS) && (copieDeplacement[i+j] != '\0');){
+  for (int j=0; (copieDeplacement[i+j] != HAUT)&&(copieDeplacement[i+j] != GAUCHE)&&(copieDeplacement[i+j] != DROITE) && (copieDeplacement[i+j] != BAS) && (copieDeplacement[i+j] != '\0');j++){
         char sequence[j+1];
         creation_sequence(i, i+j, copieDeplacement, sequence);
         if (somme_deplacement(sequence) == 0){
           for (int l = 0; l < (j+1); l++){
+            t_tabDeplacement vide;
+            strncpy(aSupprimer,vide,MOUVEMENT);
             retenir_position(aSupprimer,l);
+            suppression_tous_caractere(aSupprimer[], copieDeplacement[]);
           }
         }
       }
 }
-
 
 void creation_sequence(int debut, int fin, char copieDeplacement[], char sequence[]){
   int ecart = fin - debut + 1;
   for (int i = 0; i < ecart; i++){
     sequence[i] = copieDeplacement[debut + i];
   }
-}
-
-void trier_unifier(char aSupprimer[]){
-  int c;
-  //phase tri
-  int tailleD = 0; 
-  for (int compteur = 0; aSupprimer[compteur]!= '\0'; compteur++){
-    tailleD++;
-  }
-  for(int j=1;j<=tailleD;j++) 
-    for(int i=0;i<tailleD-1;i++)
-        if ( aSupprimer[i] > aSupprimer[i+1] ) {
-                c = aSupprimer[i];
-                aSupprimer[i] = aSupprimer[i+1];
-                aSupprimer[i+1] = c;
-        } 
-  //phase unification
-  for (int i=0; i<tailleD; i++){
-    if (aSupprimer[i+1] == aSupprimer[i]){
-      aSupprimer[i] = 0;
-    }
-  }
-  char copie[tailleD];
-  c = 0;
-  for (int i = 0; i < tailleD; i++){
-    if(aSupprimer[i] != 0){
-      copie[c] = aSupprimer[i];
-      c++;
-    }
-  }
-  strncpy(aSupprimer,copie,MOUVEMENT);
 }
