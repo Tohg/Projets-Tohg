@@ -234,17 +234,44 @@ bool gagne(t_Plateau plateau) {
 }
 
 /**
- * @brief Affiche le résultat final et quitte le programme
+ * @brief Affiche le résultat final et propose d'enregistrer
  * @param plateau le plateau final à vérifier
+ * @param compteur nombre de mouvements effectués
+ * @param fichier nom du fichier de partie
+ * @param deplacement nom du fichier de déplacement optimisé
  */
 void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
-   char deplacement[]) {
+                    char deplacement[]) {
   if (gagne(plateau)) {
-    printf("La suite de déplacements %s est bien une solution ", fichier);
-    printf("pour la partie %s. \n\nElle contient %d déplacements\n", deplacement, compteur);
+    printf("\n=== BRAVO ! ===\n");
+    printf("La suite de déplacements est bien une solution\n");
+    printf("pour la partie %s.\n", fichier);
+    printf("Elle contient %d mouvements (optimisée).\n\n", compteur);
+
+    char reponse;
+    char nom_fichier[FICHIER_BUFFER];
+    printf("Voulez-vous enregistrer la version optimisée ? (o/n) : ");
+    scanf(" %c", &reponse);
+
+    if (reponse == 'o' || reponse == 'O') {
+      printf("Nom du fichier de sortie : ");
+      scanf("%14s", nom_fichier);
+
+      FILE *f = fopen(nom_fichier, "w");
+      if (f == NULL) {
+        printf("ERREUR : Impossible de créer le fichier %s\n",
+               nom_fichier);
+      } else {
+        fwrite(deplacement, sizeof(char), strlen(deplacement), f);
+        fclose(f);
+        printf("Fichier %s enregistré avec succès !\n", nom_fichier);
+        printf("Nombre de mouvements : %d\n", compteur);
+      }
+    }
   } else {
+    printf("\n=== ECHEC ===\n");
     printf("La suite de déplacement %s N'EST ", deplacement);
-    printf("PAS une solution pour la partie %s .\n", fichier);
+    printf("PAS une solution pour la partie %s.\n", fichier);
   }
 }
 
