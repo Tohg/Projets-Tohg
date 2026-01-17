@@ -3,7 +3,7 @@
  * @brief On doit ranger les caisses sur les cibles
  * @author Temeio HARAPOI--GAUDIN / Noa PRIEM/ 1B1
  * @version version2
- * @date 02/12/2025
+ * @date 18/01/2025
  *
  * Nous sommes '@', nous pouvons pousser les caisses '$',
  * De cette maniere nous devons les déplacer sur les '.'
@@ -55,8 +55,7 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
 void afficher_plateau(t_Plateau plateau);
 void afficher_entete(char fichier[], int compteur);
 bool gagne(t_Plateau plateau);
-void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
-                    char deplacement[]);
+void detecter_gagne(t_Plateau plateau, int compteur, char fichier[], char deplacement[]);
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
               char touche, t_Plateau plateauInitial, int caisse);
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2);
@@ -65,14 +64,13 @@ bool verifier_mouvement_valide(char cible, int caisse);
 bool obtenir_direction(char touche, int *di, int *dj);
 char obtenir_caractere_affichage(char cible);
 char obtenir_caractere_ancienne_pos(char original);
-bool verifier_mouvement_valide(char cible, int caisse);
 void detecter_touche(char touche, int *lig, int *col, int *compteur,
                      t_Plateau plateauInitial, t_Plateau plateau);
-void nettoyer_deplacements(char deplacements[], char nettoyes[]);
 int obtenir_bilan_mouvement(char touche);
 bool mouvement_pousse_caisse(char touche);
 int calculer_bilan_sequence(char deplacements[], int debut,
                             int *fin_sequence);
+void nettoyer_deplacements(char deplacements[], char nettoyes[]);
 
 
 int main() {
@@ -91,18 +89,20 @@ int main() {
   t_Plateau plateauInitial = {{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}};
   t_tabDeplacement deplacement;
   printf("Quel fichier de partie : ");
-  scanf("%s", fichier);
+  scanf("%14s", fichier);
   charger_partie(plateauInitial, fichier);
 
   //definition des déplacement
   printf("Quel fichier de déplacement : ");
-  scanf("%s", nomdeplacement);
+  scanf("%14s", nomdeplacement);
   charger_deplacements(deplacement, nomdeplacement, &tailleDep);
-  strncpy(copieDeplacement, deplacement, MOUVEMENT);
+  strncpy(copieDeplacement, deplacement, MOUVEMENT - 1);
+  copieDeplacement[MOUVEMENT - 1] = '\0';
 
   //Supprimer les séquences inutiles
   nettoyer_deplacements(copieDeplacement, depureeeDeplacement);
-  strncpy(deplacement, depureeeDeplacement, MOUVEMENT);
+  strncpy(deplacement, depureeeDeplacement, MOUVEMENT - 1);
+  deplacement[MOUVEMENT - 1] = '\0';
   tailleDep = strlen(deplacement);
 
   //copie du niveau
@@ -110,19 +110,20 @@ int main() {
   copie_plateau(plateauInitial, plateau);
   recherche_sokoban(plateau,&lig, &col);
 
+  // dans la partie
   afficher_entete(nomdeplacement, compteur);
   afficher_plateau(plateau);
-
+  
   for (int i = 0; i < tailleDep; i++) {
     usleep(TEMPS);
     touche = deplacement[i];
-    detecter_touche(touche, &lig, &col, &compteur, plateauInitial,
-                    plateau);
+    detecter_touche(touche, &lig, &col, &compteur,
+            plateauInitial, plateau);
     afficher_entete(nomdeplacement, compteur);
     afficher_plateau(plateau);
   }
-
-  detecter_gagne(plateau, compteur, fichier, nomdeplacement);
+  
+  detecter_gagne(plateau,compteur, fichier, nomdeplacement);
   return 0;
 }
 
@@ -156,7 +157,8 @@ void charger_partie(t_Plateau plateau, char fichier[15]) {
  * @param fichier nom du fichier contenant les mouvements
  * @param nb pointeur pour stocker le nombre de mouvements lus
  */
-void charger_deplacements(t_tabDeplacement t, char fichier[], int *nb) {
+void charger_deplacements(t_tabDeplacement t, char fichier[],
+                          int *nb) {
   FILE *f;
   char dep;
   *nb = 0;
@@ -236,12 +238,10 @@ bool gagne(t_Plateau plateau) {
  * @param plateau le plateau final à vérifier
  */
 void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
-                    char deplacement[]) {
+   char deplacement[]) {
   if (gagne(plateau)) {
-    printf("La suite de déplacements %s est bien une solution ",
-           fichier);
-    printf("pour la partie %s. \n\nElle contient %d déplacements\n",
-           deplacement, compteur);
+    printf("La suite de déplacements %s est bien une solution ", fichier);
+    printf("pour la partie %s. \n\nElle contient %d déplacements\n", deplacement, compteur);
   } else {
     printf("La suite de déplacement %s N'EST ", deplacement);
     printf("PAS une solution pour la partie %s .\n", fichier);
@@ -271,7 +271,7 @@ void copie_plateau(t_Plateau plateau1, t_Plateau plateau2) {
 void recherche_sokoban(t_Plateau plateau, int *lig, int *col) {
   for (int i = 0; i < TAILLE; i++) {
     for (int j = 0; j < TAILLE; j++) {
-      if ((plateau[i][j] == CHAR_SOKOBAN) ||
+      if ((plateau[i][j] == CHAR_SOKOBAN) || 
           (plateau[i][j] == CHAR_SOKOBAN_CIBLE)) {
         *lig = i;
         *col = j;
@@ -317,7 +317,8 @@ char obtenir_caractere_affichage(char cible) {
  * @return CHAR_VIDE ( ) sinon
  */
 char obtenir_caractere_ancienne_pos(char original) {
-  return (original == CHAR_CIBLE || original == CHAR_CAISSE_CIBLE ||
+  return (original == CHAR_CIBLE || 
+          original == CHAR_CAISSE_CIBLE || 
           original == CHAR_SOKOBAN_CIBLE) ? CHAR_CIBLE : CHAR_VIDE;
 }
 
@@ -345,7 +346,7 @@ bool verifier_mouvement_valide(char cible, int caisse) {
  * @param compteur pointeur compteur de coups (incrémenté)
  * @param touche caractère de direction (h/b/g/d)
  * @param plateauInitial plateau initial pour vérifier les cibles
- * @param caisse 1 pour pousser une caisse, 0 pour déplacer seul
+ * @param caisse 1 pour pousser une caisse, 0 pour se déplacer seul
  */
 void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
               char touche, t_Plateau plateauInitial, int caisse) {
@@ -357,26 +358,28 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
   int ti = *lig + di;
   int tj = *col + dj;
   char cible = plateau[ti][tj];
-
+  
   if (!verifier_mouvement_valide(cible, caisse))
     return;
-
+  
+  // Sauvegarder l'ancienne position avant mise à jour
   int ancienne_lig = *lig;
   int ancienne_col = *col;
-
+  
+  // Pousser une caisse si nécessaire
   if (caisse == 1) {
     int bi = ti + di;
     int bj = tj + dj;
     char au_dela = plateau[bi][bj];
     if (au_dela != CHAR_VIDE && au_dela != CHAR_CIBLE)
       return;
-    plateau[bi][bj] = (au_dela == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE
-                                               : CHAR_CAISSE;
+    plateau[bi][bj] = (au_dela == CHAR_CIBLE) ? CHAR_CAISSE_CIBLE :
+     CHAR_CAISSE;
   }
-
+  
   plateau[ti][tj] = obtenir_caractere_affichage(cible);
-  plateau[ancienne_lig][ancienne_col] = obtenir_caractere_ancienne_pos(
-      plateauInitial[ancienne_lig][ancienne_col]);
+  plateau[ancienne_lig][ancienne_col] =
+    obtenir_caractere_ancienne_pos(plateauInitial[ancienne_lig][ancienne_col]);
   
   *lig = ti;
   *col = tj;
@@ -384,7 +387,7 @@ void deplacer(t_Plateau plateau, int *lig, int *col, int *compteur,
 }
 
 /**
- * @brief Analyse la touche et appelle deplacer avec bon paramètre
+ * @brief Analyse la touche et appelle deplacer avec les bon paramètres
  * @param touche le caractère de touche lu (h/H/b/B/g/G/d/D)
  * @param lig pointeur position ligne sokoban (mise à jour)
  * @param col pointeur position colonne sokoban (mise à jour)
@@ -439,17 +442,16 @@ bool mouvement_pousse_caisse(char touche) {
 }
 
 /**
- * @brief Calcule le bilan depuis une position jusqu'à annulation/caisse
+ * @brief Calcule le bilan depuis une position jusqu'à une annulation ou caisse
  * @param deplacements la séquence de mouvements
  * @param debut position de départ
  * @param fin_sequence pointeur pour retourner la position de fin
  * @return le bilan total, ou 1 si caisse rencontrée avant annulation
  */
-int calculer_bilan_sequence(char deplacements[], int debut,
-                            int *fin_sequence) {
+int calculer_bilan_sequence(char deplacements[], int debut, int *fin_sequence) {
   int somme = obtenir_bilan_mouvement(deplacements[debut]);
   int i = debut + 1;
-
+  
   while (deplacements[i] != '\0' && somme != 0) {
     if (mouvement_pousse_caisse(deplacements[i])) {
       *fin_sequence = i;
@@ -458,30 +460,30 @@ int calculer_bilan_sequence(char deplacements[], int debut,
     somme += obtenir_bilan_mouvement(deplacements[i]);
     i++;
   }
-
+  
   *fin_sequence = i - 1;
   return somme;
 }
 
 /**
- * @brief Nettoie la séquence en supprimant les retours inutiles
+ * @brief Nettoie la séquence de déplacements en supprimant les retours inutiles
  * @param deplacements séquence originale de mouvements
  * @param nettoyes séquence nettoyée sans retours inutiles
  */
 void nettoyer_deplacements(char deplacements[], char nettoyes[]) {
   int position = 0;
   int i = 0;
-
+  
   while (deplacements[i] != '\0') {
     if (mouvement_pousse_caisse(deplacements[i])) {
       nettoyes[position++] = deplacements[i];
       i++;
       continue;
     }
-
+    
     int fin_seq;
     int bilan = calculer_bilan_sequence(deplacements, i, &fin_seq);
-
+    
     if (bilan == 0 && fin_seq > i) {
       i = fin_seq + 1;
     } else {
@@ -489,6 +491,6 @@ void nettoyer_deplacements(char deplacements[], char nettoyes[]) {
       i++;
     }
   }
-
+  
   nettoyes[position] = '\0';
 }
