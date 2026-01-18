@@ -70,8 +70,10 @@ int main(void) {
   char nom_move[BUFFER_SIZE];
   t_Plateau plateau_init, plateau;
   t_Moves moves_original, moves_clean;
+  t_Moves moves_played;
   int lig, col, coup = 0;
   int taille_original, taille_clean;
+  int taille_played = 0;
 
   printf("Nom du fichier partie (.sok): ");
   scanf("%14s", nom_partie);
@@ -92,13 +94,18 @@ int main(void) {
     bool move_joue = false;
     deplacer_sokoban(plateau, plateau_init, &lig, &col,
                      moves_original[i], &coup, &move_joue);
+    if (move_joue) {
+      moves_played[taille_played++] = moves_original[i];
+    }
     afficher_entete(nom_move, coup);
     afficher_plateau(plateau);
   }
 
-  strcpy(moves_clean, moves_original);
-  taille_clean = taille_original;
-  nettoyer_moves(moves_original, moves_clean, &taille_clean);
+  moves_played[taille_played] = '\0';
+
+  strcpy(moves_clean, moves_played);
+  taille_clean = taille_played;
+  nettoyer_moves(moves_played, moves_clean, &taille_clean);
 
   afficher_bilan(plateau, nom_partie, nom_move,
                  taille_original, taille_clean, moves_clean);
