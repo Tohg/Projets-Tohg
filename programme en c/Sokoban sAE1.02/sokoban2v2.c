@@ -14,7 +14,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 #include <ctype.h>
 
 #define TAILLE 14
@@ -46,8 +50,8 @@ void afficher_plateau(t_Plateau plateau);
 void afficher_entete(const char *nom_move, int coup);
 bool est_gagne(t_Plateau plateau);
 void afficher_bilan(t_Plateau plateau, const char *nom_partie,
-                    const char *nom_move, int initial, int optimise,
-                    const char *moves_optimise);
+                    const char *nom_move, int taille,
+                    const char *moves_played);
 void deplacer_sokoban(t_Plateau plateau, t_Plateau initial,
                       int *lig, int *col, char move, int *coup,
                       bool *move_joue);
@@ -61,8 +65,9 @@ void mettre_a_jour_plateau(t_Plateau plateau, t_Plateau initial,
                            int lig, int col, int ni, int nj);
 void copier_plateau(t_Plateau src, t_Plateau dst);
 void trouver_sokoban(t_Plateau plateau, int *lig, int *col);
-void nettoyer_moves(t_Moves original, t_Moves nettoye, int *taille);
 bool est_mouvement_valide(char move);
+void clear_screen(void);
+void read_input(char *buf, int size);
 
 
 int main(void) {
@@ -76,11 +81,11 @@ int main(void) {
   int taille_played = 0;
 
   printf("Nom du fichier partie (.sok): ");
-  scanf("%14s", nom_partie);
+  read_input(nom_partie, BUFFER_SIZE);
   charger_plateau(plateau_init, nom_partie);
 
   printf("Nom du fichier deplacements (.dep): ");
-  scanf("%14s", nom_move);
+  read_input(nom_move, BUFFER_SIZE);
   charger_moves(moves_original, nom_move, &taille_original);
 
   copier_plateau(plateau_init, plateau);
@@ -90,7 +95,11 @@ int main(void) {
   afficher_plateau(plateau);
 
   for (int i = 0; i < taille_original; i++) {
+#ifdef _WIN32
+    Sleep(250);
+#else
     usleep(250000);
+#endif
     bool move_joue = false;
     deplacer_sokoban(plateau, plateau_init, &lig, &col,
                      moves_original[i], &coup, &move_joue);
@@ -103,12 +112,9 @@ int main(void) {
 
   moves_played[taille_played] = '\0';
 
-  strcpy(moves_clean, moves_played);
-  taille_clean = taille_played;
-  nettoyer_moves(moves_played, moves_clean, &taille_clean);
+  /* NO OPTIMIZATION: save moves_played directly (they are already a valid solution) */
 
-  afficher_bilan(plateau, nom_partie, nom_move,
-                 taille_original, taille_clean, moves_clean);
+  afficher_bilan(plateau, nom_partie, nom_move, taille_played, moves_played);
 
   return 0;
 }
@@ -156,7 +162,7 @@ void charger_plateau(t_Plateau plateau, const char *fichier) {
  */
 void charger_moves(t_Moves moves, const char *fichier, int *count) {
   FILE *f = fopen(fichier, "r");
-  char c;
+  int ch;
   *count = 0;
 
   if (f == NULL) {
@@ -164,9 +170,9 @@ void charger_moves(t_Moves moves, const char *fichier, int *count) {
     exit(EXIT_FAILURE);
   }
 
-  while (fread(&c, 1, 1, f) == 1 && *count < MAX_MOVES) {
-    if (est_mouvement_valide(c)) {
-      moves[*count] = c;
+  while ((ch = fgetc(f)) != EOF && *count < MAX_MOVES) {
+    if (est_mouvement_valide((char)ch)) {
+      moves[*count] = (char)ch;
       (*count)++;
     }
   }
@@ -212,7 +218,11 @@ void afficher_plateau(t_Plateau plateau) {
  * @param coup nombre de coups effectués
  */
 void afficher_entete(const char *nom_move, int coup) {
+#ifdef _WIN32
+  system("cls");
+#else
   system("clear");
+#endif
   printf("======= SOKOBAN =======\n");
   printf("Mouvements: %s\n", nom_move);
   printf("Coups: %d\n", coup);
@@ -485,29 +495,29 @@ bool est_gagne(t_Plateau plateau) {
  * @param optimise taille après optimisation
  */
 void afficher_bilan(t_Plateau plateau, const char *nom_partie,
-                    const char *nom_move, int initial, int optimise,
-                    const char *moves_optimise) {
+                    const char *nom_move, int taille,
+                    const char *moves_played) {
   if (est_gagne(plateau)) {
     printf("\n=== VICTOIRE ===\n");
     printf("La suite %s est bien une solution pour %s.\n", nom_move,
            nom_partie);
-    printf("Longueur initiale: %d caracteres\n", initial);
-    printf("Longueur optimisee: %d caracteres\n", optimise);
+    printf("Longueur: %d caracteres\n", taille);
 
-    char reponse;
-    printf("Enregistrer la suite optimisee (O/N): ");
-    scanf(" %c", &reponse);
+      char reponse_buf[4];
+      printf("Enregistrer la suite (O/N): ");
+      read_input(reponse_buf, sizeof(reponse_buf));
+      char reponse = reponse_buf[0];
 
-    if (reponse == 'O' || reponse == 'o') {
-      char nom_fichier[BUFFER_SIZE];
-      printf("Nom du fichier de sortie: ");
-      scanf("%14s", nom_fichier);
+      if (reponse == 'O' || reponse == 'o') {
+        char nom_fichier[BUFFER_SIZE];
+        printf("Nom du fichier de sortie: ");
+        read_input(nom_fichier, BUFFER_SIZE);
 
-      FILE *f = fopen(nom_fichier, "w");
+        FILE *f = fopen(nom_fichier, "w");
       if (f == NULL) {
         printf("Erreur: impossible de creer %s\n", nom_fichier);
       } else {
-        fwrite(moves_optimise, 1, strlen(moves_optimise), f);
+        fwrite(moves_played, 1, strlen(moves_played), f);
         fclose(f);
         printf("Fichier %s enregistre\n", nom_fichier);
       }
@@ -516,5 +526,43 @@ void afficher_bilan(t_Plateau plateau, const char *nom_partie,
     printf("\n=== ECHEC ===\n");
     printf("La suite %s N'EST PAS une solution pour %s.\n", nom_move,
            nom_partie);
+  }
+}
+
+/**
+ * @brief Efface l'écran de façon portable
+ */
+void clear_screen(void) {
+#ifdef _WIN32
+  HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (h == INVALID_HANDLE_VALUE) return;
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  DWORD written;
+  COORD topLeft = {0, 0};
+  if (!GetConsoleScreenBufferInfo(h, &csbi)) {
+    system("cls");
+    return;
+  }
+  DWORD cells = csbi.dwSize.X * csbi.dwSize.Y;
+  FillConsoleOutputCharacter(h, ' ', cells, topLeft, &written);
+  FillConsoleOutputAttribute(h, csbi.wAttributes, cells, topLeft, &written);
+  SetConsoleCursorPosition(h, topLeft);
+#else
+  printf("\x1b[2J\x1b[H");
+#endif
+}
+
+/**
+ * @brief Lit une ligne d'entrée et supprime CR/LF
+ */
+void read_input(char *buf, int size) {
+  if (fgets(buf, size, stdin) == NULL) {
+    buf[0] = '\0';
+    return;
+  }
+  size_t len = strlen(buf);
+  while (len > 0 && (buf[len-1] == '\n' || buf[len-1] == '\r')) {
+    buf[len-1] = '\0';
+    len--;
   }
 }
