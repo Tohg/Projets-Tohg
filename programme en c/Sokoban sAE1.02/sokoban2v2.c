@@ -197,14 +197,13 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
   if (f == NULL) {
     printf("FICHIER NON TROUVE\n");
   } else {
-    fread(&dep, sizeof(char), 1, f);
-    if (feof(f)) {
-      printf("FICHIER VIDE\n");
-    } else {
-      while (!feof(f)) {
+    while(fread(&dep, sizeof(char), 1, f) == 1){
+      if (dep == HAUT || dep == BAS || dep == GAUCHE || dep == DROITE ||
+          dep == HAUT_CAISSE || dep == BAS_CAISSE ||
+          dep == GAUCHE_CAISSE || dep == DROITE_CAISSE) {
         t[*nb] = dep;
         (*nb)++;
-        fread(&dep, sizeof(char), 1, f);
+    }
       }
     }
   }
