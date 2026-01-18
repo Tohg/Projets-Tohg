@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define TAILLE 12
+#define TAILLE 14
 #define MOUVEMENT 1000
 #define FICHIER_BUFFER 15
 #define TEMPS 250000
