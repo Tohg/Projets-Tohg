@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#define TAILLE 12
+#define TAILLE 14
 #define MAX_MOVES 1000
 #define BUFFER_SIZE 15
 
@@ -175,7 +175,8 @@ bool est_mouvement_valide(char move) {
  * @param plateau le plateau à afficher
  */
 void afficher_plateau(t_Plateau plateau) {
-  for (int i = 0; i < limit; i++) {
+
+  for (int i = 0; i < TAILLE; i++) {
     for (int j = 0; j < TAILLE; j++) {
       if (plateau[i][j] == CH_CAISSE_CIBLE) {
         printf("%c", CH_CAISSE);
