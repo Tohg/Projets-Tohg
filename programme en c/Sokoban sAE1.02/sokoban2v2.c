@@ -184,7 +184,7 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
 /**
  * @brief Affiche le plateau en remplaçant les caisses/sokoban
  *        sur cible par leurs symboles normaux
- * @param plateau le plateau à afficher (12x12)
+ * @param plateau le plateau à afficher
  */
 void afficher_plateau(t_Plateau plateau) {
   for (int i = 0; i < TAILLE; i++) {
