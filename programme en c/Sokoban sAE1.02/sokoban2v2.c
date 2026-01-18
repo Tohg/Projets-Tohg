@@ -50,6 +50,14 @@ void afficher_bilan(t_Plateau plateau, const char *nom_partie,
 void deplacer_sokoban(t_Plateau plateau, t_Plateau initial,
                       int *lig, int *col, char move, int *coup,
                       bool *move_joue);
+bool get_direction(char move, int *di, int *dj);
+bool position_valide(int i, int j);
+bool deplacer_caisse(t_Plateau plateau, int ni, int nj,
+                     int di, int dj);
+bool mouvement_possible(t_Plateau plateau, int ni, int nj,
+                        int di, int dj);
+void mettre_a_jour_plateau(t_Plateau plateau, t_Plateau initial,
+                           int lig, int col, int ni, int nj);
 void copier_plateau(t_Plateau src, t_Plateau dst);
 void trouver_sokoban(t_Plateau plateau, int *lig, int *col);
 void nettoyer_moves(t_Moves original, t_Moves nettoye, int *taille);
@@ -257,6 +265,115 @@ char get_sokoban_char(char cible) {
 }
 
 /**
+ * @brief Obtient les décalages de direction selon le mouvement
+ * @param move le mouvement (h/b/g/d)
+ * @param di pointeur pour le décalage ligne
+ * @param dj pointeur pour le décalage colonne
+ * @return true si le mouvement est valide
+ */
+bool get_direction(char move, int *di, int *dj) {
+  move = tolower(move);
+  *di = 0;
+  *dj = 0;
+
+  if (move == HAUT) {
+    *di = -1;
+  } else if (move == BAS) {
+    *di = 1;
+  } else if (move == GAUCHE) {
+    *dj = -1;
+  } else if (move == DROITE) {
+    *dj = 1;
+  } else {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * @brief Vérifie si une position est valide sur le plateau
+ * @param i la ligne
+ * @param j la colonne
+ * @return true si position valide
+ */
+bool position_valide(int i, int j) {
+  return (i >= 0 && i < TAILLE && j >= 0 && j < TAILLE);
+}
+
+/**
+ * @brief Gère le déplacement d'une caisse
+ * @param plateau le plateau à modifier
+ * @param ni position ligne de la caisse
+ * @param nj position colonne de la caisse
+ * @param di décalage ligne
+ * @param dj décalage colonne
+ * @return true si la caisse peut se déplacer
+ */
+bool deplacer_caisse(t_Plateau plateau, int ni, int nj,
+                     int di, int dj) {
+  int bi = ni + di;
+  int bj = nj + dj;
+
+  if (!position_valide(bi, bj)) {
+    return false;
+  }
+
+  char beyond = plateau[bi][bj];
+  if (beyond != CH_VIDE && beyond != CH_CIBLE) {
+    return false;
+  }
+
+  plateau[bi][bj] = (beyond == CH_CIBLE) ?
+                    CH_CAISSE_CIBLE : CH_CAISSE;
+  return true;
+}
+
+/**
+ * @brief Vérifie si le déplacement vers la case est possible
+ * @param plateau le plateau
+ * @param ni ligne destination
+ * @param nj colonne destination
+ * @param di décalage ligne
+ * @param dj décalage colonne
+ * @return true si déplacement valide
+ */
+bool mouvement_possible(t_Plateau plateau, int ni, int nj,
+                        int di, int dj) {
+  if (!position_valide(ni, nj)) {
+    return false;
+  }
+
+  char cible = plateau[ni][nj];
+
+  if (cible == CH_MUR) {
+    return false;
+  }
+
+  if (cible == CH_CAISSE || cible == CH_CAISSE_CIBLE) {
+    return deplacer_caisse(plateau, ni, nj, di, dj);
+  }
+
+  return true;
+}
+
+/**
+ * @brief Met à jour le plateau après un déplacement
+ * @param plateau le plateau à modifier
+ * @param initial le plateau initial
+ * @param lig ancienne position ligne
+ * @param col ancienne position colonne
+ * @param ni nouvelle position ligne
+ * @param nj nouvelle position colonne
+ */
+void mettre_a_jour_plateau(t_Plateau plateau, t_Plateau initial,
+                           int lig, int col, int ni, int nj) {
+  char cible = plateau[ni][nj];
+  plateau[ni][nj] = get_sokoban_char(cible);
+  plateau[lig][col] = get_ancien_char(initial[lig][col]);
+}
+
+/**
  * @brief Déplace Sokoban selon le mouvement
  * @param plateau le plateau à modifier
  * @param initial le plateau initial pour les cibles
@@ -264,23 +381,14 @@ char get_sokoban_char(char cible) {
  * @param col pointeur position colonne
  * @param move le mouvement à effectuer
  * @param coup pointeur compteur de coups
- * @param move_joue pointeur pour indiquer si le mouvement a pu être joué
+ * @param move_joue pointeur pour indiquer si le mouvement a été joué
  */
 void deplacer_sokoban(t_Plateau plateau, t_Plateau initial,
                       int *lig, int *col, char move, int *coup,
                       bool *move_joue) {
-  int di = 0, dj = 0;
-  move = tolower(move);
+  int di, dj;
 
-  if (move == HAUT) {
-    di = -1;
-  } else if (move == BAS) {
-    di = 1;
-  } else if (move == GAUCHE) {
-    dj = -1;
-  } else if (move == DROITE) {
-    dj = 1;
-  } else {
+  if (!get_direction(move, &di, &dj)) {
     *move_joue = false;
     return;
   }
@@ -288,39 +396,12 @@ void deplacer_sokoban(t_Plateau plateau, t_Plateau initial,
   int ni = *lig + di;
   int nj = *col + dj;
 
-  if (ni < 0 || ni >= TAILLE || nj < 0 || nj >= TAILLE) {
+  if (!mouvement_possible(plateau, ni, nj, di, dj)) {
     *move_joue = false;
     return;
   }
 
-  char cible = plateau[ni][nj];
-
-  if (cible == CH_MUR) {
-    *move_joue = false;
-    return;
-  }
-
-  if (cible == CH_CAISSE || cible == CH_CAISSE_CIBLE) {
-    int bi = ni + di;
-    int bj = nj + dj;
-
-    if (bi < 0 || bi >= TAILLE || bj < 0 || bj >= TAILLE) {
-      *move_joue = false;
-      return;
-    }
-
-    char beyond = plateau[bi][bj];
-    if (beyond != CH_VIDE && beyond != CH_CIBLE) {
-      *move_joue = false;
-      return;
-    }
-
-    plateau[bi][bj] = (beyond == CH_CIBLE) ? CH_CAISSE_CIBLE
-                                            : CH_CAISSE;
-  }
-
-  plateau[ni][nj] = get_sokoban_char(cible);
-  plateau[*lig][*col] = get_ancien_char(initial[*lig][*col]);
+  mettre_a_jour_plateau(plateau, initial, *lig, *col, ni, nj);
 
   *lig = ni;
   *col = nj;
