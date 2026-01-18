@@ -203,7 +203,6 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
           dep == GAUCHE_CAISSE || dep == DROITE_CAISSE) {
         t[*nb] = dep;
         (*nb)++;
-    }
       }
     }
   }
