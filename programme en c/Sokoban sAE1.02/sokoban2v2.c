@@ -14,11 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#ifdef _WIN32
-#include <windows.h>
-#else
 #include <unistd.h>
-#endif
 #include <ctype.h>
 
 #define TAILLE 14
@@ -66,7 +62,6 @@ void mettre_a_jour_plateau(t_Plateau plateau, t_Plateau initial,
 void copier_plateau(t_Plateau src, t_Plateau dst);
 void trouver_sokoban(t_Plateau plateau, int *lig, int *col);
 bool est_mouvement_valide(char move);
-void clear_screen(void);
 void read_input(char *buf, int size);
 
 
@@ -74,10 +69,10 @@ int main(void) {
   char nom_partie[BUFFER_SIZE];
   char nom_move[BUFFER_SIZE];
   t_Plateau plateau_init, plateau;
-  t_Moves moves_original, moves_clean;
+  t_Moves moves_original;
   t_Moves moves_played;
   int lig, col, coup = 0;
-  int taille_original, taille_clean;
+  int taille_original;
   int taille_played = 0;
 
   printf("Nom du fichier partie (.sok): ");
@@ -95,11 +90,7 @@ int main(void) {
   afficher_plateau(plateau);
 
   for (int i = 0; i < taille_original; i++) {
-#ifdef _WIN32
-    Sleep(250);
-#else
     usleep(250000);
-#endif
     bool move_joue = false;
     deplacer_sokoban(plateau, plateau_init, &lig, &col,
                      moves_original[i], &coup, &move_joue);
@@ -218,11 +209,7 @@ void afficher_plateau(t_Plateau plateau) {
  * @param coup nombre de coups effectués
  */
 void afficher_entete(const char *nom_move, int coup) {
-#ifdef _WIN32
-  system("cls");
-#else
-  system("clear");
-#endif
+  printf("\x1b[2J\x1b[H");
   printf("======= SOKOBAN =======\n");
   printf("Mouvements: %s\n", nom_move);
   printf("Coups: %d\n", coup);
@@ -527,29 +514,6 @@ void afficher_bilan(t_Plateau plateau, const char *nom_partie,
     printf("La suite %s N'EST PAS une solution pour %s.\n", nom_move,
            nom_partie);
   }
-}
-
-/**
- * @brief Efface l'écran de façon portable
- */
-void clear_screen(void) {
-#ifdef _WIN32
-  HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (h == INVALID_HANDLE_VALUE) return;
-  CONSOLE_SCREEN_BUFFER_INFO csbi;
-  DWORD written;
-  COORD topLeft = {0, 0};
-  if (!GetConsoleScreenBufferInfo(h, &csbi)) {
-    system("cls");
-    return;
-  }
-  DWORD cells = csbi.dwSize.X * csbi.dwSize.Y;
-  FillConsoleOutputCharacter(h, ' ', cells, topLeft, &written);
-  FillConsoleOutputAttribute(h, csbi.wAttributes, cells, topLeft, &written);
-  SetConsoleCursorPosition(h, topLeft);
-#else
-  printf("\x1b[2J\x1b[H");
-#endif
 }
 
 /**
