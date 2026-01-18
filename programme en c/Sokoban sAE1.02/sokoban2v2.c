@@ -81,6 +81,7 @@ int main() {
   char depureeeDeplacement[MOUVEMENT];
   int compteur = 0;
   int tailleDep = 0;
+  int tailleDep_original = 0;
   int lig = 0;
   int col = 0;
   char touche =' ';
@@ -93,11 +94,16 @@ int main() {
   charger_partie(plateauInitial, fichier);
 
   //definition des déplacement
-  printf("Quel fichier de déplacement : ");
+  printf("Quel fichier de deplacement : ");
   scanf("%14s", nomdeplacement);
   charger_deplacements(deplacement, nomdeplacement, &tailleDep);
   strncpy(copieDeplacement, deplacement, MOUVEMENT - 1);
   copieDeplacement[MOUVEMENT - 1] = '\0';
+  tailleDep_original = strlen(copieDeplacement);
+
+  //Afficher les informations avant nettoyage
+  printf("\n========== AVANT OPTIMISATION ==========\n");
+  printf("Sequence originale: %d mouvements\n", tailleDep_original);
 
   //Supprimer les séquences inutiles
   nettoyer_deplacements(copieDeplacement, depureeeDeplacement);
@@ -105,10 +111,20 @@ int main() {
   deplacement[MOUVEMENT - 1] = '\0';
   tailleDep = strlen(deplacement);
 
+  //Afficher les statistiques de nettoyage
+  printf("\n========== APRES OPTIMISATION ==========\n");
+  printf("Sequence optimisee: %d mouvements\n", tailleDep);
+  int reduction = tailleDep_original - tailleDep;
+  printf("Mouvements supprimes: %d\n", reduction);
+  if (tailleDep_original > 0) {
+    double pourcentage = (reduction * 100.0) / tailleDep_original;
+    printf("Reduction: %.1f%%\n\n", pourcentage);
+  }
+
   //copie du niveau
   t_Plateau plateau;
   copie_plateau(plateauInitial, plateau);
-  recherche_sokoban(plateau,&lig, &col);
+  recherche_sokoban(plateau, &lig, &col);
 
   // dans la partie
   afficher_entete(nomdeplacement, compteur);
@@ -123,7 +139,7 @@ int main() {
     afficher_plateau(plateau);
   }
   
-  detecter_gagne(plateau,compteur, fichier, nomdeplacement);
+  detecter_gagne(plateau, compteur, fichier, nomdeplacement);
   return 0;
 }
 
@@ -134,18 +150,28 @@ int main() {
  */
 void charger_partie(t_Plateau plateau, char fichier[15]) {
   FILE *f;
-  char finDeLigne;
+  char ligne[TAILLE + 2];  // +2 pour \n et \0
 
   f = fopen(fichier, "r");
   if (f == NULL) {
     printf("FICHIER NON TROUVE");
     exit(EXIT_FAILURE);
   } else {
-    for (int ligne = 0; ligne < TAILLE; ligne++) {
-      for (int colonne = 0; colonne < TAILLE; colonne++) {
-        fread(&plateau[ligne][colonne], sizeof(char), 1, f);
+    for (int ligne_idx = 0; ligne_idx < TAILLE; ligne_idx++) {
+      if (fgets(ligne, TAILLE + 2, f) != NULL) {
+        for (int col = 0; col < TAILLE; col++) {
+          if (col < (int)strlen(ligne) && ligne[col] != '\n') {
+            plateau[ligne_idx][col] = ligne[col];
+          } else {
+            plateau[ligne_idx][col] = CHAR_VIDE;
+          }
+        }
+      } else {
+        // Remplir avec des espaces si fin de fichier
+        for (int col = 0; col < TAILLE; col++) {
+          plateau[ligne_idx][col] = CHAR_VIDE;
+        }
       }
-      fread(&finDeLigne, sizeof(char), 1, f);
     }
     fclose(f);
   }
@@ -279,7 +305,7 @@ void detecter_gagne(t_Plateau plateau, int compteur, char fichier[],
 /**
  * @brief Copie le plateau1 vers le plateau 2
  * @param plateau1 plateau source à copier
- * @param plateau2 plateau destination (12x12)
+ * @param plateau2 plateau destination
  */
 void copie_plateau(t_Plateau plateau1, t_Plateau plateau2) {
   for (int i = 0; i < TAILLE; i++) {
@@ -291,7 +317,7 @@ void copie_plateau(t_Plateau plateau1, t_Plateau plateau2) {
 
 /**
  * @brief Trouve la position actuelle de sokoban
- * @param plateau le plateau à fouiller (12x12)
+ * @param plateau le plateau à fouiller 
  * @param lig pointeur où stocker la ligne trouvée
  * @param col pointeur où stocker la colonne trouvée
  */
