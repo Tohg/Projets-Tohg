@@ -46,7 +46,8 @@ void afficher_plateau(t_Plateau plateau);
 void afficher_entete(const char *nom_move, int coup);
 bool est_gagne(t_Plateau plateau);
 void afficher_bilan(t_Plateau plateau, const char *nom_partie,
-                    const char *nom_move, int initial, int optimise);
+                    const char *nom_move, int initial, int optimise,
+                    const char *moves_optimise);
 void deplacer_sokoban(t_Plateau plateau, t_Plateau initial,
                       int *lig, int *col, char move, int *coup,
                       bool *move_joue);
@@ -100,7 +101,7 @@ int main(void) {
   nettoyer_moves(moves_original, moves_clean, &taille_clean);
 
   afficher_bilan(plateau, nom_partie, nom_move,
-                 taille_original, taille_clean);
+                 taille_original, taille_clean, moves_clean);
 
   return 0;
 }
@@ -477,7 +478,8 @@ bool est_gagne(t_Plateau plateau) {
  * @param optimise taille après optimisation
  */
 void afficher_bilan(t_Plateau plateau, const char *nom_partie,
-                    const char *nom_move, int initial, int optimise) {
+                    const char *nom_move, int initial, int optimise,
+                    const char *moves_optimise) {
   if (est_gagne(plateau)) {
     printf("\n=== VICTOIRE ===\n");
     printf("La suite %s est bien une solution pour %s.\n", nom_move,
@@ -498,7 +500,7 @@ void afficher_bilan(t_Plateau plateau, const char *nom_partie,
       if (f == NULL) {
         printf("Erreur: impossible de creer %s\n", nom_fichier);
       } else {
-        fwrite(nom_move, 1, strlen(nom_move), f);
+        fwrite(moves_optimise, 1, strlen(moves_optimise), f);
         fclose(f);
         printf("Fichier %s enregistre\n", nom_fichier);
       }
