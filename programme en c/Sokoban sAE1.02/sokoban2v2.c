@@ -150,7 +150,14 @@ int main() {
  */
 void charger_partie(t_Plateau plateau, char fichier[15]) {
   FILE *f;
-  char ligne[TAILLE + 2];  // +2 pour \n et \0
+  char ligne[TAILLE + 2];
+
+  // Initialiser tout le plateau avec des espaces
+  for (int i = 0; i < TAILLE; i++) {
+    for (int j = 0; j < TAILLE; j++) {
+      plateau[i][j] = CHAR_VIDE;
+    }
+  }
 
   f = fopen(fichier, "r");
   if (f == NULL) {
@@ -159,17 +166,14 @@ void charger_partie(t_Plateau plateau, char fichier[15]) {
   } else {
     for (int ligne_idx = 0; ligne_idx < TAILLE; ligne_idx++) {
       if (fgets(ligne, TAILLE + 2, f) != NULL) {
+        // Charger uniquement jusqu'à la position TAILLE
         for (int col = 0; col < TAILLE; col++) {
-          if (col < (int)strlen(ligne) && ligne[col] != '\n') {
+          if (col < (int)strlen(ligne) && ligne[col] != '\n'
+              && ligne[col] != '\r') {
             plateau[ligne_idx][col] = ligne[col];
           } else {
             plateau[ligne_idx][col] = CHAR_VIDE;
           }
-        }
-      } else {
-        // Remplir avec des espaces si fin de fichier
-        for (int col = 0; col < TAILLE; col++) {
-          plateau[ligne_idx][col] = CHAR_VIDE;
         }
       }
     }
@@ -210,10 +214,30 @@ void charger_deplacements(t_tabDeplacement t, char fichier[],
 /**
  * @brief Affiche le plateau en remplaçant les caisses/sokoban
  *        sur cible par leurs symboles normaux
- * @param plateau le plateau à afficher
+ * @param plateau le plateau à afficher (12x12)
  */
 void afficher_plateau(t_Plateau plateau) {
-  for (int i = 0; i < TAILLE; i++) {
+  int derniere_ligne_utile = -1;
+
+  // Trouver la dernière ligne non vide
+  for (int i = TAILLE - 1; i >= 0; i--) {
+    int vide = 1;
+    for (int j = 0; j < TAILLE; j++) {
+      if (plateau[i][j] != CHAR_VIDE) {
+        vide = 0;
+        break;
+      }
+    }
+    if (!vide) {
+      derniere_ligne_utile = i;
+      break;
+    }
+  }
+
+  // Afficher uniquement jusqu'à la dernière ligne utile + 1
+  int limite = (derniere_ligne_utile >= 0) ? derniere_ligne_utile + 1 : 1;
+
+  for (int i = 0; i < limite; i++) {
     for (int j = 0; j < TAILLE; j++) {
       if (plateau[i][j] == CHAR_CAISSE_CIBLE) {
         printf("%c", CHAR_CAISSE);
