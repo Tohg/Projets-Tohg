@@ -175,20 +175,6 @@ bool est_mouvement_valide(char move) {
  * @param plateau le plateau à afficher
  */
 void afficher_plateau(t_Plateau plateau) {
-  int derniere = -1;
-
-  for (int i = TAILLE - 1; i >= 0; i--) {
-    for (int j = 0; j < TAILLE; j++) {
-      if (plateau[i][j] != CH_VIDE) {
-        derniere = i;
-        break;
-      }
-    }
-    if (derniere != -1) break;
-  }
-
-  int limit = (derniere >= 0) ? derniere + 1 : 1;
-
   for (int i = 0; i < limit; i++) {
     for (int j = 0; j < TAILLE; j++) {
       if (plateau[i][j] == CH_CAISSE_CIBLE) {
