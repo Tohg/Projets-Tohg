@@ -131,4 +131,21 @@ public class Agence {
         }
         return null;
     }
+
+    public static void main(String[] args) {
+        System.out.println("=== Test de la classe Agence ===\n");
+        
+        // Création d'une agence avec données initiales
+        Agence agence = new Agence("Agence Location Express");
+        
+        System.out.println("Agence créée avec données de test\n");
+        
+        System.out.println("--- Voitures disponibles ---");
+        ArrayList<Voiture> voitures = agence.getVoituresDisponibles();
+        for (Voiture v : voitures) {
+            v.afficher();
+        }
+        
+        System.out.println("\nNombre de voitures disponibles: " + voitures.size());
+    }
 }

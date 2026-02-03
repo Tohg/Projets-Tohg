@@ -39,7 +39,33 @@ public class Voiture {
 
     // Main de test (Question 2)
     public static void main(String[] args) {
+        System.out.println("=== Test de la classe Voiture ===\n");
+        
+        // Test avec constructeur sans saisie (données pré-définies)
         ArrayList<Voiture> flotte = new ArrayList<>(10);
-        // Ajout, affichage et suppression à tester ici
+        
+        Voiture v1 = new Voiture("AB-123-CD", "Clio", 50000, 0.5f);
+        Voiture v2 = new Voiture("EF-456-GH", "Tesla S", 10000, 1.2f);
+        Voiture v3 = new Voiture("IJ-789-KL", "Peugeot 308", 75000, 0.6f);
+        
+        flotte.add(v1);
+        flotte.add(v2);
+        flotte.add(v3);
+        
+        System.out.println("Flotte de véhicules:");
+        for (Voiture v : flotte) {
+            v.afficher();
+        }
+        
+        System.out.println("\nTest des getters:");
+        System.out.println("Immatriculation v1: " + v1.getImmatriculation());
+        System.out.println("Kilométrage v1: " + v1.getNbKilometres() + " km");
+        System.out.println("Tarif v1: " + v1.getTarifKm() + "€/km");
+        
+        System.out.println("\nTest de modification du kilométrage:");
+        System.out.println("Avant: " + v1.getNbKilometres() + " km");
+        v1.setNbKilometres(51000);
+        System.out.println("Après: " + v1.getNbKilometres() + " km");
+        v1.afficher();
     }
 }
