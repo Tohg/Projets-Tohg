@@ -1,0 +1,43 @@
+import java.util.*;
+
+public class ListeEmployes extends Employe{
+    private ArrayList<Employe> liste;
+
+    public ListeEmployes() {
+        this.liste = new ArrayList<>();
+    }
+
+    public ListeEmployes ajouter(Employe employe){
+        return this.add(Employe employe);
+    }
+
+    public ListeEmployes trierParSalaire() {
+        for (int i = (this.length - 1); i > 1; i--) {
+            for (int j = 0; j < i - 1; j++){
+                if (Employe[i].calculerSalaire() < Employe[j].calculerSalaire(){
+                    Employe temp = Employe[i];
+                    Employe[i] = Employe[j];
+                    Employe[j] = temp;
+                })
+            }
+        }
+    }
+
+    public void afficher(){
+        for (Employe employe : liste){
+            super.afficher();
+        }
+    }
+
+    public ListeEmployes selectionner(int min,int max){
+        for (Employe employe : liste){
+            if ((employe.age < min)||(employe.age > max)){
+                liste.remove(employe);
+            } 
+        }
+        return liste;
+    }
+
+
+    public getListe() { return listeEmployes}
+}
